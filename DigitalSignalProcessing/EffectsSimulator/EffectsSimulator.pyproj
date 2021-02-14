@@ -1,0 +1,46 @@
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>465be1c8-01d5-4e12-a7ef-585290fbf421</ProjectGuid>
+    <ProjectHome>.</ProjectHome>
+    <StartupFile>EffectsSimulator\EffectsSimulatorMain.py</StartupFile>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>.</WorkingDirectory>
+    <OutputPath>.</OutputPath>
+    <Name>EffectsSimulator</Name>
+    <RootNamespace>EffectsSimulator</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DebugSymbols>true</DebugSymbols>
+    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="EffectsSimulator\AudioTools.py" />
+    <Compile Include="EffectsSimulator\EffectsSimulatorMain.py" />
+    <Compile Include="EffectsSimulator\FXSetup.py" />
+    <Compile Include="EffectsSimulator\ModuleChain.py" />
+    <Compile Include="EffectsSimulator\ModulesFrequencySeries.py" />
+    <Compile Include="EffectsSimulator\ModulesGeneric.py" />
+    <Compile Include="EffectsSimulator\ModulesTimeSeries.py" />
+    <Compile Include="EffectsSimulator\SimulatorMain.py" />
+    <Compile Include="EffectsSimulator\__init__.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="EffectsSimulator\" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
+  <!-- Uncomment the CoreCompile target to enable the Build command in
+       Visual Studio and specify your pre- and post-build commands in
+       the BeforeBuild and AfterBuild targets below. -->
+  <!--<Target Name="CoreCompile" />-->
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+</Project>
