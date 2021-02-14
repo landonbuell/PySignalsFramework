@@ -13,13 +13,27 @@ import numpy as np
 
 import ModulesTimeSeries
 import ModulesFrequencySeries
-import FXSetup
+import EffectsSystem
+import AudioTools
 
 
         #### MAIN EXECUTABLE ####
 
 if __name__ == "__main__":
     
-    ModuleSet = FXSetup.EffectsEmulatorSystem("MySetup")
-    ModuleSet.Add(Modules.AnalysisFames("Input",inputShape=(1,44100))
+    # Load in sample signal
+    nSamples = 88200
+    sampleRate = 44100
+    timeAxis = np.arange(0,nSamples)/sampleRate
+    audio = AudioTools.SimpleWavesGenerator(time=timeAxis,linearFrequencies=[55,110])
+    signalSine = audio.SineWave()
+    AudioTools.Plotting.PlotTimeSeries(timeAxis,signalSine,"signal")
+
+    # Create the FX module
+    ModuleSet = EffectsSystem.EffectsSystem("MySetup")
+    ModuleSet.Add(ModulesTimeSeries.AnalysisFames("InputToFrames",inputShape=(1,nSamples),
+                                                  samplesPerFrame=2048,overlapSamples=1024,
+                                                  maxFrame=512,zeroPad=2048))
+
+    ModuleSet.InitializeChain()
 

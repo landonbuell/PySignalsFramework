@@ -7,6 +7,7 @@ ModuleChain
 
             #### IMPORTS ####
 
+from ModulesGeneric import *
 import ModulesTimeSeries
 import ModulesFrequencySeries
 
@@ -27,14 +28,37 @@ class LinearModuleChain :
     """
     def __init__(self,name,existingModules=None):
         """ Constructor for LinearModuleChain Instance """
-        self._head = Modules.IdentityModule("HeadNode")
-        self._tail = Modules.IdentityModule("TailNode")
+        self._head = IdentityModule("HeadNode")
+        self._tail = IdentityModule("TailNode")
         if existingModules:
-            for mod in existingModules:
-                self.Append(mod)
+            # If given a list of modules
+            if type(existingModules) == list:   
+                self.AssembleFromList(existingModules)
+            elif type(existingModules) == AbstractParentModule:
+                self.AssembleFromNode(existingModules)
+            else:
+                errMsg = "Existing module must be of type List or AbstractParentModule, but got {0}".format(type(existingModules))
+                raise TypeError(errMsg)
         else:
             self._head._next = self._tail
             self._tail._prev = self._head
+
+    def AssembleFromList(self,moduleList):
+        """ Assemble a module chain from list of unconnected modules """
+        for module in moduleList:
+            self.Append(module)
+        return self
+
+    def AssembleFromNode(self,moduleNode):
+        """ Assmble a module chain from single node to end """
+        currentModule = moduleNode        
+        while True:
+            self.Append(currentModule)
+            if currentModule._next is None: 
+                break
+            currentModule = currentModule._next
+        return self
+
 
     def Append (self,newModule):
         """ Append a new Module to the tail of this Chain """
@@ -71,6 +95,16 @@ class LinearModuleChain :
     def GetOutput(self):
         """ Return Output of Module Chain """
         return self._tail._prev
+
+    @property
+    def GetHead(self):
+        """ Return head Module of Chain """
+        return self._head
+
+    @property
+    def GetTail(self):
+        """ Return tail Module of Chain """
+        return self._tail
 
     @property
     def GetChainList(self):

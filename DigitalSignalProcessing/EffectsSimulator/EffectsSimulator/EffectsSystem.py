@@ -8,23 +8,22 @@ FXSetup
         #### IMPORTS ####
 
 import ModuleChain
-import Modules
 
         #### CLASS DEFINITIONS ####
 
-class EffectsEmulatorSystem:
+class EffectsSystem:
     """ 
-    EffectsEmulatorSystem Type -
+    EffectsSystem Type -
         Parent container for all classes in this package
     --------------------------------
     _name (str) : Name for user- Identification
-    _type (str) : Type of EffectsEmulatorSystem
+    _type (str) : Type of EffectsSystem
     
     _moduleChain (LinearModuleChain) : 
     _nModules (int) : Number of modules in chain
     
     --------------------------------
-    Return Instatiated EffectsEmmulatorSystem
+    Return Instatiated EffectsSystem
     """
 
     def __init__(self,name,modules=None,):
@@ -32,7 +31,7 @@ class EffectsEmulatorSystem:
         self._name = name
         self._type = "EffectsEmmulatorSystem"
 
-        self._moduleChain = FXChain.LinearModuleChain(name+"_chain")
+        self._moduleChain = ModuleChain.LinearModuleChain(name+"_chain")
 
     
 
@@ -40,10 +39,12 @@ class EffectsEmulatorSystem:
         """ Call Each layer in chain with Inputs X """
         return X
 
-    def InitializeChain(self):
+    def InitializeChain(self,inputShape=None):
         """ Initialize All modules in the Module Chain """
         currentModule = self._moduleChain._head._next
-        while (currentModule != self._moduleChain._tail):
+        if inputShape:
+            currentModule.SetInputShape(inputShape)
+        while (currentModule != self._moduleChain.GetTail):
             currentModule.Initialize()
             currentModule = currentModule._next
         return self
@@ -62,6 +63,7 @@ class EffectsEmulatorSystem:
     @property
     def Output(self):
         """ Get last module in chain """
+        return self._moduleChain.GetOutput
 
     def GetInputParams(self,inputSignal):
         """ Detemrine qualities of input signal """

@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>465be1c8-01d5-4e12-a7ef-585290fbf421</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>EffectsSimulator\EffectsSimulatorMain.py</StartupFile>
+    <StartupFile>EffectsSimulator\SimulatorMain.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,8 +22,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="EffectsSimulator\AudioTools.py" />
-    <Compile Include="EffectsSimulator\EffectsSimulatorMain.py" />
-    <Compile Include="EffectsSimulator\FXSetup.py" />
+    <Compile Include="EffectsSimulator\EffectsSystem.py" />
     <Compile Include="EffectsSimulator\ModuleChain.py" />
     <Compile Include="EffectsSimulator\ModulesFrequencySeries.py" />
     <Compile Include="EffectsSimulator\ModulesGeneric.py" />

@@ -37,7 +37,7 @@ class SimpleWavesGenerator :
         self._sampleRate = sampleRate
         
     def SetLocalValues (self,value):
-        """ Set Amplitude terms """
+        """ Set Local value terms based on data type """
         if value:
             if type(values) == int:
                 values = np.ones(shape=self._nVals,dtype=np.float32)*value
@@ -54,7 +54,7 @@ class SimpleWavesGenerator :
     def TestLocalValues(self):
         """ test if all params have correct shape """
         self._nVals = self._freq.shape[-1]
-        if (self._amp != self._nVals) or (self._phas != self._nVals):
+        if (self._amps.shape[-1] != self._nVals) or (self._phas.shape[-1] != self._nVals):
             errmsg = "frequency, amplitude, and phase arrays must all have the same shape\n"
             errmsg += "Instead, found: {}, {}, {}".format(self._freq,self._amps,self._phas)
             raise ValueError(errmsg)
@@ -65,7 +65,7 @@ class SimpleWavesGenerator :
         """ Create Cosine wave given class attributes """
         self.TestLocalValues()
         signal = np.zeros(shape=self._time.shape[-1])
-        for A*f*p in zip(self._amp,self._freq,self._phas):
+        for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A*np.cos(2*np.pi*f*self._time + p)
         return signal
 
@@ -73,7 +73,7 @@ class SimpleWavesGenerator :
         """ Create Sine wave given class attributes """
         self.TestLocalValues()
         signal = np.zeros(shape=self._time.shape[-1])
-        for A*f*p in zip(self._amp,self._freq,self._phas):
+        for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A*np.sin(2*np.pi*f*self._time + p)
         return signal
 
@@ -81,7 +81,7 @@ class SimpleWavesGenerator :
         """ Create Square wave given class attributes """
         self.TestLocalValues()
         signal = np.zeros(shape=self._time.shape[-1])
-        for A*f*p in zip(self._amp,self._freq,self._phas):
+        for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.square(2*np.pi*f*self._time + p)
         return signal
 
@@ -89,7 +89,7 @@ class SimpleWavesGenerator :
         """ Create Sawtooth wave given class attributes """
         self.TestLocalValues()
         signal = np.zeros(shape=self._time.shape[-1])
-        for A*f*p in zip(self._amp,self._freq,self._phas):
+        for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.sawtooth(2*np.pi*f*self._time + p)
         return signal
 
@@ -97,7 +97,7 @@ class SimpleWavesGenerator :
         """ Create Triangle wave given class attributes """
         self.TestLocalValues()
         signal = np.zeros(shape=self._time.shape[-1])
-        for A*f*p in zip(self._amp,self._freq,self._phas):
+        for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.sawtooth(2*np.pi*f*self._time + p,width=0.5)
         return signal
 
@@ -123,7 +123,7 @@ class AudioIO :
 
     @staticmethod
     def ReadWAV(localPath,channels="all"):
-        """ Read wav Audio file and return sampl rate and audio data """
+        """ Read wav Audio file and return sample rate and audio data """
         rate,data = scio.wavfile.read(localPath)
         if channels.upper() in ["All","BOTH","LR"]:
             return rate,data.transpose()
@@ -148,3 +148,77 @@ class AudioIO :
     def WriteTXT(localPath,signal):
         """ Write txt Audio file to local path """
         raise NotImplementedError()
+
+class Plotting:
+    """
+    Class of Static methods to provide matplotlib visualizations of data
+    """
+
+    @staticmethod
+    def PlotTimeSeries(xData,yData,labels=[],title="",save=False,show=True):
+        """
+        Plot Time-series information in Matplotlib figure
+        --------------------------------
+        xData (list/arr) : n-Dim array of values to plot as x-axis values
+        yData (list/arr) : n-Dim array of values to plot as y-axis values
+        labels (list) : List of strings to use as column lables
+        title (str) : String of text to use as plot title / save name
+        save (bool) : If true, save the figure to the current working directory
+        show (bool) : If true, plot the figure to console
+        --------------------------------
+        Optionally save/show plot
+        """
+        plt.figure(figsize=(16,12))
+        plt.title(label=title,size=40,weight='bold')
+        plt.xlabel("Time [samples]",size=20,weight='bold')
+        plt.ylabel("Amplitude [units]",size=20,weight='bold')
+
+        # Each are 1D arrays
+        if (xData.ndim == 1) and (yData.ndim == 1):
+            plt.plot(xData,yData,color='blue',label=labels)
+            plt.hlines(0,min(xData),max(xData),color='black')
+            plt.vlines(0,min(yData),max(xData),color='black')
+
+        plt.grid()
+        plt.legend()
+
+        if save == True:
+            saveName = title.replace(" ","")
+            plt.savefig(saveName+".png")
+        if show == True:
+            plt.show()
+        plt.close()
+        return None
+        
+
+    @staticmethod
+    def PlotFrequencySeries(xData,yData,labels=[],title="",save=False,show=True):
+        """
+        Plot Time-series information in Matplotlib figure
+        --------------------------------
+        xData (list/arr) : n-Dim array of values to plot as x-axis values
+        yData (list/arr) : n-Dim array of values to plot as y-axis values
+        labels (list) : List of strings to use as column lables
+        title (str) : String of text to use as plot title / save name
+        save (bool) : If true, save the figure to the current working directory
+        show (bool) : If true, plot the figure to console
+        --------------------------------
+        Optionally save/show plot
+        """
+        return None
+
+    @staticmethod
+    def PlotGeneric(xData,yData,labels=[],title="",save=False,show=True):
+        """
+        Plot Time-series information in Matplotlib figure
+        --------------------------------
+        xData (list/arr) : n-Dim array of values to plot as x-axis values
+        yData (list/arr) : n-Dim array of values to plot as y-axis values
+        labels (list) : List of strings to use as column lables
+        title (str) : String of text to use as plot title / save name
+        save (bool) : If true, save the figure to the current working directory
+        show (bool) : If true, plot the figure to console
+        --------------------------------
+        Optionally save/show plot
+        """
+        return None

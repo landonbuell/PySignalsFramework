@@ -35,14 +35,32 @@ class AnalysisFames (AbstractParentModule):
                  samplesPerFrame=1024,overlapSamples=768,maxFrames=256,zeroPad=1024):
         """ Constructor for AnalysisFames Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._samplesPerFrame = samplePerFrame
+        self._samplesPerFrame = samplesPerFrame
         self._overlapSamples = overlapSamples
         self._maxFrames = maxFrames
         self._zeroPad = self._zeroPad
 
+    def Initialize (self):
+        """ Initialize this module for usage in chain """
+        super().Initialize()
+        self._shapeOutput = (self._samplesPerFrame + self._zeroPad,
+                            self._maxFrames)
+        self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
+        self._initialized = True 
+        return self
+
+    def SignalToFrames(self,X):
+        """ Convert signal X into analysis Frames """
+        for i in range(len(self._maxFrames)):
+            self._signal[0:self._samplesPerFrame] = frame
+        return self
+
     def Call(self, X):
         """ Call this Module with inputs X """
         super().Call(X)
+
+
+        return self._signal
 
 
 class NBandEquilizer(AbstractParentModule) :

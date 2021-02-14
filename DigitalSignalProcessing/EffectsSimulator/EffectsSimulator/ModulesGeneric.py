@@ -34,10 +34,8 @@ class AbstractParentModule :
     _shapeInput (tup) : Indicates shape (and rank) of module input
     _shapeOutput (tup) : Indicates shape (and rank) of module output
 
-    _signalIn (arr) : Signal to Transform
-    _signalOut (arr) : Signal from Transform
+    _signal (arr) : Signal from Transform
     _sampleRate (int) : Number of samples per second  
-    _sampleLength (int) : Number of samples in output signal 
     --------------------------------
     Abstract class - Make no instance
     """
@@ -56,39 +54,47 @@ class AbstractParentModule :
         self._shapeInput = inputShape
         self._shapeOutput = inputShape
 
-        self._signalIn = np.array([])  
-        self._signalOut = np.array([])  
+        self._signal = np.array([])  
         self._sampleRate = sampleRate                 
-        self._signalLength = self._signalOut.shape[-1]
+        
 
     # Local Properties
-
-    @property
-    def OutputShape(self):
-        """ Get The output shape of this module """
-        return self._shapeOutput
 
     @property
     def InputShape(self):
         """ Get the input shape of this module """
         return self._shapeInput
 
+    @property
+    def OutputShape(self):
+        """ Get The output shape of this module """
+        return self._shapeOutput
+
+    def SetInputShape(self,x):
+        """ Set the input shape of this module """
+        self._shapeInput = x
+        return self
+
+    def SetOutputShape(self,x):
+        """ Set the output shape of this module """
+        self._shapeOutput = x
+        return self
+
     # Methods
 
     def Initialize (self,*args):
         """ Initialize this module for usage in chain """
         try:
-            self._shapeInput = self._prev._output
+            self._shapeInput = self._prev._shapeOutput
         except:
-            self._shapeInput = (0,) 
-        self._shapeOutput = self._shapeInput
+            self._shapeInput = (1,)
         self._initialized = True 
         return self
 
     def Call (self,X):
         """ Call this Module with inputs X """
         if self._initalized == False:
-            errMsg = self.__str__() + " has not been initialized\n" + "Call Instance.Initialize() before use"
+            errMsg = self.__str__() + " has not been initialized\n\t" + "Call Instance.Initialize() before use"
             raise NotImplementedError(errMsg)
         return X
 
@@ -116,7 +122,7 @@ class IdentityModule (AbstractParentModule):
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "IdentityModule"
 
-class CustomCallable (AbstractParentModule):
+class CustomCallableModule (AbstractParentModule):
     """
     CustomCallable Type - Returns User defined transformation 
     --------------------------------
