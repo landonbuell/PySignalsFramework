@@ -28,8 +28,11 @@ class LinearModuleChain :
     """
     def __init__(self,name,existingModules=None):
         """ Constructor for LinearModuleChain Instance """
+        self._name = name
+        self._type = "LinearModuleChain"
         self._head = IdentityModule("HeadNode")
         self._tail = IdentityModule("TailNode")
+       
         if existingModules:
             # If given a list of modules
             if type(existingModules) == list:   
@@ -120,11 +123,19 @@ class LinearModuleChain :
         """ Return a Non-aliased copy of this FX Chain """
         return LinearModuleChain(newName,self.GetChainList)
 
+    # Magic Methods
+
     def __len__(self):
         """ Get Length of this Module chain """
         return len(self.GetChainList)
 
-    
+    def __str__(self):
+        """ string-level representation of this instance """
+        return self._type + " - " + self._name
+
+    def __repr__(self):
+        """ Programmer-level representation of this instance """
+        return self._type + ": \'" + self._name + "\' w/ " + str(len(self)) + " nodes"
 
 class ModuleChainTools :
     """

@@ -18,24 +18,46 @@ from ModulesGeneric import *
 
             #### MODULE DEFINITIONS ####
 
-class NBandEquilizer(AbstractParentModule) :
+class Equilizer(AbstractParentModule) :
     """
     NBandEquilize - 
         Parent Class of all N-band Equilizers
     --------------------------------
     (See AbstractParentModule for documentation)
 
+    _bands (list[bands]) : Bands to apply to this equilizer
     _nBands (int) : Number of filterbands to use in EQ
-    _bandTypes (list_ 
     --------------------------------
     """
 
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 nBands=1,bandTypes=[None]):
+                 bands=[]):
         """ Constructor for NBandEquilizer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._nBands = nBands
-        self._bandTypes = bandTypes
+        self._type = "Equilizier"
+
+        self._bands = bands
+        self._nBands = len(bands)
+
+        self._frequencyResponse = self.BuildResponse()
+
+
+    def BuildResponse(self):
+        """ Build this module's frequency response curve """
+
+        return self
+
+    def ApplyResponse(self,X):
+        """ Apply Frequency response curve to the signal """
+
+        return X
+
+    def Call(self,X):
+        """ Call this Module with inputs X """
+        super().Call(X)
+
+        return X
+
 
 
 

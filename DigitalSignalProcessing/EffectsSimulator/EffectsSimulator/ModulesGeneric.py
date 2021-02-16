@@ -93,7 +93,7 @@ class AbstractParentModule :
 
     def Call (self,X):
         """ Call this Module with inputs X """
-        if self._initalized == False:
+        if self._initialized == False:
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call Instance.Initialize() before use"
             raise NotImplementedError(errMsg)
         return X
@@ -106,7 +106,7 @@ class AbstractParentModule :
 
     def __repr__(self):
         """ Programmer-level representation of this instance """
-        return self._type + " " + self._name + " @ " + str(self._chainIndex)
+        return self._type + ": \'" + self._name + "\' @ " + str(self._chainIndex)
 
 class IdentityModule (AbstractParentModule):
     """

@@ -18,7 +18,7 @@ from ModulesGeneric import *
 
             #### MODULE DEFINITIONS ####
 
-class AnalysisFames (AbstractParentModule):
+class AnalysisFamesConstructor (AbstractParentModule):
     """
     ModuleAnalysisFrames Type - 
         Deconstruct a 1D time-domain signal into a 2D array of overlapping analysis frames
@@ -32,54 +32,62 @@ class AnalysisFames (AbstractParentModule):
     Return instantiated AnalysisFrames Object 
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 samplesPerFrame=1024,overlapSamples=768,maxFrames=256,zeroPad=1024):
+                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,zeroPad=1024):
         """ Constructor for AnalysisFames Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "AnalysisFrameConstructor"
         self._samplesPerFrame = samplesPerFrame
-        self._overlapSamples = overlapSamples
+        self._percentOverlap = percentOverlap
+        self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
         self._maxFrames = maxFrames
-        self._zeroPad = self._zeroPad
+        self._zeroPad = zeroPad
+        self._framesInUse = 0
 
     def Initialize (self):
         """ Initialize this module for usage in chain """
         super().Initialize()
-        self._shapeOutput = (self._samplesPerFrame + self._zeroPad,
-                            self._maxFrames)
+        self._shapeOutput = (self._maxFrames,
+                             self._samplesPerFrame + self._zeroPad)
         self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
+        self._framesInUse = 0
         self._initialized = True 
         return self
 
     def SignalToFrames(self,X):
         """ Convert signal X into analysis Frames """
-        for i in range(len(self._maxFrames)):
-            self._signal[0:self._samplesPerFrame] = frame
+        frameStartIndex = 0
+        for i in range(self._maxFrames):
+            frame = X[frameStartIndex:frameStartIndex+self._samplesPerFrame]
+            try:
+                self._signal[i,0:self._samplesPerFrame] = frame
+            except ValueError:
+                self._signal[i,0:len(frame)] = frame
+                break
+            frameStartIndex += self._overlapSamples
+            self._framesInUse += 1
         return self
 
     def Call(self, X):
         """ Call this Module with inputs X """
-        super().Call(X)
-
-
+        X = super().Call(X)
+        X = self.SignalToFrames(X)
         return self._signal
 
-
-class NBandEquilizer(AbstractParentModule) :
-    """
-    NBandEquilize - 
-        Parent Class of all N-band Equilizers
-    --------------------------------
-    (See AbstractParentModule for documentation)
-
-    _nBands (int) : Number of filterbands to use in EQ
-    _bandTypes (list_ 
-    --------------------------------
+class Resample (AbstractParentModule):
     """
 
-    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 nBands=1,bandTypes=[None]):
-        """ Constructor for NBandEquilizer Instance """
-        super().__init__(name,sampleRate,inputShape,next,prev)
-        self._nBands = nBands
-        self._bandTypes = bandTypes
+    """
+    pass
 
+class WindowFunction (AbstractParentModule):
+    """
+
+    """
+    pass
+
+class AmplitudeEnvelope(AbstractParentModule):
+    """
+
+    """
+    pass
 
