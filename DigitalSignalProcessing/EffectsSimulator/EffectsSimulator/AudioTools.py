@@ -149,6 +149,16 @@ class AudioIO :
         """ Write txt Audio file to local path """
         raise NotImplementedError()
 
+
+class WindowFunctions :
+    """
+    static class of window functions
+    """
+    def GetWindowFunction(functionName,nSamples):
+        """ Get A window function from string identifying it """
+        windows = {"blackman"}
+
+
 class Plotting:
     """
     Class of Static methods to provide matplotlib visualizations of data

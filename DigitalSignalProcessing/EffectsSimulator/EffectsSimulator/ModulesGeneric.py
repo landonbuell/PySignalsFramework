@@ -24,16 +24,12 @@ class AbstractParentModule :
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Module Instance
-
     _next (AbstractParentModule) : Next module in the module chain
     _prev (AbstractParentModule) : Prev module in the module chain
-
     _chainIndex (int) : Location where Module sits in chain 
-    _initialized (bool) : Indicates if Module has been initialized
-    
+    _initialized (bool) : Indicates if Module has been initialized    
     _shapeInput (tup) : Indicates shape (and rank) of module input
     _shapeOutput (tup) : Indicates shape (and rank) of module output
-
     _signal (arr) : Signal from Transform
     _sampleRate (int) : Number of samples per second  
     --------------------------------
@@ -57,6 +53,23 @@ class AbstractParentModule :
         self._signal = np.array([])  
         self._sampleRate = sampleRate                 
         
+    # Methods
+
+    def Initialize (self,*args):
+        """ Initialize this module for usage in chain """
+        try:
+            self._shapeInput = self._prev._shapeOutput
+        except:
+            self._shapeInput = (1,)
+        self._initialized = True 
+        return self
+
+    def Call (self,X):
+        """ Call this Module with inputs X """
+        if self._initialized == False:
+            errMsg = self.__str__() + " has not been initialized\n\t" + "Call Instance.Initialize() before use"
+            raise NotImplementedError(errMsg)
+        return X
 
     # Local Properties
 
@@ -80,24 +93,6 @@ class AbstractParentModule :
         self._shapeOutput = x
         return self
 
-    # Methods
-
-    def Initialize (self,*args):
-        """ Initialize this module for usage in chain """
-        try:
-            self._shapeInput = self._prev._shapeOutput
-        except:
-            self._shapeInput = (1,)
-        self._initialized = True 
-        return self
-
-    def Call (self,X):
-        """ Call this Module with inputs X """
-        if self._initialized == False:
-            errMsg = self.__str__() + " has not been initialized\n\t" + "Call Instance.Initialize() before use"
-            raise NotImplementedError(errMsg)
-        return X
-
     # Magic Methods
 
     def __str__(self):
@@ -113,7 +108,16 @@ class IdentityModule (AbstractParentModule):
     IdentityModule Type - Provides no Transformation of input
         Serves as head/tail nodes of FX chain Graph
     --------------------------------
-    (See AbstractParentModule for documentation)
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Module Instance
+    _next (AbstractParentModule) : Next module in the module chain
+    _prev (AbstractParentModule) : Prev module in the module chain
+    _chainIndex (int) : Location where Module sits in chain 
+    _initialized (bool) : Indicates if Module has been initialized    
+    _shapeInput (tup) : Indicates shape (and rank) of module input
+    _shapeOutput (tup) : Indicates shape (and rank) of module output
+    _signal (arr) : Signal from Transform
+    _sampleRate (int) : Number of samples per second  
     --------------------------------
     Return Instantiated identityModule
     """
@@ -126,8 +130,18 @@ class CustomCallableModule (AbstractParentModule):
     """
     CustomCallable Type - Returns User defined transformation 
     --------------------------------
-    (See AbstractParentModule for documentation)
-    _call (callable) : User-denfined or desired function transformation
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Module Instance
+    _next (AbstractParentModule) : Next module in the module chain
+    _prev (AbstractParentModule) : Prev module in the module chain
+    _chainIndex (int) : Location where Module sits in chain 
+    _initialized (bool) : Indicates if Module has been initialized    
+    _shapeInput (tup) : Indicates shape (and rank) of module input
+    _shapeOutput (tup) : Indicates shape (and rank) of module output
+    _signal (arr) : Signal from Transform
+    _sampleRate (int) : Number of samples per second  
+
+    _callable (callable) : User-denfined or desired function transformation
     --------------------------------
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
@@ -136,11 +150,11 @@ class CustomCallableModule (AbstractParentModule):
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "CustomCallable"
         if callableFunction:
-            self._call = callableFunction
+            self._callable = callableFunction
         else:
             raise ValueError("Must Provide callable argument for CustomCallable")
     
     def Call(self,X):
         """ Call this Module with inputs X """
         super().Call(X)
-        return self._call(X)
+        return self._callable(X)
