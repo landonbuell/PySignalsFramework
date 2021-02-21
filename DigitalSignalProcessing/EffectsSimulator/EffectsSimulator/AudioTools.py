@@ -154,9 +154,13 @@ class WindowFunctions :
     """
     static class of window functions
     """
-    def GetWindowFunction(functionName,nSamples):
+
+    @staticmethod
+    def WindowFunctions(functionName,nSamples):
         """ Get A window function from string identifying it """
-        windows = {"blackman"}
+        windows = {"blackman":scisig.windows.blackman,
+                   ""
+                   }
 
 
 class Plotting:

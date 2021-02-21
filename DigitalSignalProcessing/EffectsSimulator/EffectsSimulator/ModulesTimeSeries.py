@@ -15,6 +15,7 @@ import scipy.signal as signal
 import scipy.fftpack as fftpack
 
 from ModulesGeneric import *
+from AudioTools import WindowFunctions
 
             #### MODULE DEFINITIONS ####
 
@@ -108,30 +109,32 @@ class WindowFunction (AbstractParentModule):
     _sampleRate (int) : Number of samples per second 
     
     _windowType (str) : String indicating window function type
-    _windowCall (call) : Callable
+    _window(callable/array) : Callable
     _windowSize (int) : Size of window function in sample    
     --------------------------------
     Return instantiated AnalysisFrames Object 
     """
     
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 windowType=None,windowSize=None):
+                 window=None,windowType=None,nSamples=None):
         """ Constructor for AnalysisFames Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "WindowFunctionModule"
         
         self._windowType = windowType
-        self._windowSize = windowSize
-        self._window = None
+        self._windowSize = 0
+        self._window = np.array([])
 
     def Initialize(self):
         super().Initialize()
+        self._windowSize = self._shapeInput[-1]
+        self._window = WindowFunctions.GetWindowFunction
         return self
 
     def Call(self,X):
         """ Call this module with inputs X """
         X = super().Call(X)
-        raise NotImplementedError()
+        X = np.multiply(X,self._window,out=X)
         return X
 
 
