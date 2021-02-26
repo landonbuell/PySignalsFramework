@@ -60,10 +60,9 @@ class LayerChainLinear :
             currentLayer = currentLayer._next
         return self
 
-
     def Append (self,newLayer):
         """ Append a new Layer to the tail of this Chain """
-        oldTail = self._tail._prev
+        oldTail = self.GetOutput
         oldTail._next = newLayer
         newLayer._prev = oldTail
         newLayer._next = self._tail
@@ -72,16 +71,38 @@ class LayerChainLinear :
 
     def Prepend(self,newLayer):
         """ Prepend a new Layer to the head of this chain """
-        oldHead = self._head._next
+        oldHead = self.GetInput
         oldHead._prev = newLayer
         newLayer._next = oldHead
         newLayer._prev = self._head
         self._head._next = newLayer
         return self
 
+    def PopFromTail(self):
+        """ Remove + Return the last layer before the tail """
+        if len(self.GetChainList) == 0:
+            raise IndexError("No elements currently in layer chain")
+        else:
+            oldOutput = self.GetOutput
+            newOutput = oldOutput.Prev
+            self.GetTail.SetPrev(newOutput)
+            newOutput.SetNext(self.GetTail)
+        return oldOutput
+
+    def PopFromHead(self):
+        """ Remove + Return the first layer after the head """
+        if len(self.GetChainList) == 0:
+            raise IndexError("No elements currently in layer chain")
+        else:
+            oldInput = self.GetInput
+            newInput = oldInput.Next
+            self.GetHEad.SetNext(newInput)
+            newInput.SetPrev(self.GetHead)
+        return oldInput
+
     def Call(self,X):
         """ Call layer Chain w/ inputs X """
-        currentLayer = self._head._next
+        currentLayer = self.GetInput
         while (currentLayer != self._tail):
             X = currentLayer.Call(X)
             currentLayer = currentLayer._next
@@ -111,15 +132,15 @@ class LayerChainLinear :
     def GetChainList(self):
         """ Return the Lienar Chain Layers as a List """
         chainList = []
-        currentLayer = self._head._next
-        while (currentLayer._next != self._tail):
+        currentLayer = self.GetInput
+        while (currentLayer != self._tail):
             chainList.append(currentLayer)
             currentLayer = currentLayer._next
         return chainList
 
     def CopyChain(self,newName):
         """ Return a Non-aliased copy of this FX Chain """
-        return LinearLayerChain(newName,self.GetChainList)
+        return LayerChainLinear(newName,self.GetChainList)
 
     # Magic Methods
 

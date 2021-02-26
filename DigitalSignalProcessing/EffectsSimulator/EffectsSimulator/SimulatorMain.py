@@ -11,8 +11,8 @@ import os
 import sys
 import numpy as np
 
-import ModulesTimeSeries
-import ModulesFrequencySeries
+import LayersTimeSeries
+import LayersFrequencySeries
 import EffectsSystem
 import AudioTools
 
@@ -30,14 +30,16 @@ if __name__ == "__main__":
     #AudioTools.Plotting.PlotTimeSeries(timeAxis,signalRaw,"signal")
 
     # Create the FX module
-    ModuleSet = EffectsSystem.EffectsSystem("MySetup")
-    ModuleSet.Add(ModulesTimeSeries.AnalysisFamesConstructor("InputToFrames",inputShape=(1,nSamples),
+    System = EffectsSystem.EffectsSystem("MySetup")
+
+    System.Add(LayersTimeSeries.InputLayer("Input",sampleRate,inputShape=signalRaw.shape))
+    System.Add(LayersTimeSeries.AnalysisFamesConstructor("ToFrames",inputShape=(1,nSamples),
                                                   samplesPerFrame=2048,percentOverlap=0.75,
                                                   maxFrames=512,zeroPad=2048))
 
-    ModuleSet.InitializeChain()
+    System.InitializeChain()
 
-    signalProcessed = ModuleSet.Call(signalRaw)
+    signalProcessed = System.Call(signalRaw)
 
     
 

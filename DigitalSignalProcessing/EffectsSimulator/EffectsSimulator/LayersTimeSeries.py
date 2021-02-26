@@ -19,21 +19,61 @@ from AudioTools import WindowFunctions
 
             #### MODULE DEFINITIONS ####
 
-class AnalysisFamesConstructor (AbstractParentLayer):
+class InputLayer (AbstractParentLayer):
     """
     ModuleAnalysisFrames Type - 
         Deconstruct a 1D time-domain signal into a 2D array of overlapping analysis frames
     --------------------------------
     _name (str) : Name for user-level identification
-    _type (str) : Type of Module Instance
-    _next (AbstractParentModule) : Next module in the module chain
-    _prev (AbstractParentModule) : Prev module in the module chain
-    _chainIndex (int) : Location where Module sits in chain 
-    _initialized (bool) : Indicates if Module has been initialized    
-    _shapeInput (tup) : Indicates shape (and rank) of module input
-    _shapeOutput (tup) : Indicates shape (and rank) of module output
-    _signal (arr) : Signal from Transform
-    _sampleRate (int) : Number of samples per second 
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    Return instantiated AnalysisFrames Object 
+    """
+
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for AnalysisFames Instance """
+        if not inputShape:
+            raise ValueError("input shape must be provdied (cannot be \'None\')")
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "InputLayer"
+
+    # Methods
+
+    def Initialize (self,inputShape=None,**kwargs):
+        """ Initialize this layer for usage in chain """
+        super().Initialize(inputShape=None,**kwargs)
+        # Initialize input Layer?
+        return self
+
+    def Call (self,X):
+        """ Call this Layer with inputs X """
+        super().Call(X)
+        assert (x.ndim == 1)
+        return X
+
+class AnalysisFamesConstructor (AbstractParentLayer):
+    """
+    ModuleAnalysisFrames Type - 
+        Construct 2D array of analysis frames from 1D input waveform
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform   
 
     _samplesPerFrame (int) : Number of samples used in each analysisFrame
     _percentOverlap (float) : Indicates percentage overlap between adjacent frames [0,1)
@@ -56,9 +96,15 @@ class AnalysisFamesConstructor (AbstractParentLayer):
         self._zeroPad = zeroPad
         self._framesInUse = 0
 
-    def Initialize (self):
+    def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
-        super().Initialize()
+        super().Initialize(inputShape=None,**kwargs)
+        # Get the input Shape
+        if inputShape:
+            self.SetInputShape(inputShape)
+        else:
+            self.SetInputShape(self.Prev.GetOutputShape)
+        # format output shape
         self._shapeOutput = (self._maxFrames,
                              self._samplesPerFrame + self._zeroPad)
         self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
@@ -86,7 +132,7 @@ class AnalysisFamesConstructor (AbstractParentLayer):
         self.SignalToFrames(X)
         return self._signal
 
-class Resample (AbstractParentLayer):
+class ResampleLayer (AbstractParentLayer):
     """
 
     """
@@ -98,15 +144,15 @@ class WindowFunction (AbstractParentLayer):
          Apply a window finction
     --------------------------------
     _name (str) : Name for user-level identification
-    _type (str) : Type of Module Instance
-    _next (AbstractParentModule) : Next module in the module chain
-    _prev (AbstractParentModule) : Prev module in the module chain
-    _chainIndex (int) : Location where Module sits in chain 
-    _initialized (bool) : Indicates if Module has been initialized    
-    _shapeInput (tup) : Indicates shape (and rank) of module input
-    _shapeOutput (tup) : Indicates shape (and rank) of module output
-    _signal (arr) : Signal from Transform
-    _sampleRate (int) : Number of samples per second 
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
     
     _windowType (str) : String indicating window function type
     _window(callable/array) : Callable
@@ -119,16 +165,15 @@ class WindowFunction (AbstractParentLayer):
                  window=None,windowType=None,nSamples=None):
         """ Constructor for AnalysisFames Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "WindowFunctionModule"
+        self._type = "WindowFunctionLayer"
         
         self._windowType = windowType
         self._windowSize = 0
         self._window = np.array([])
 
-    def Initialize(self):
-        super().Initialize()
+    def Initialize(self,inputShape=None,**kwargs):
+        super().Initialize(inputShape=None,**kwargs)
         self._windowSize = self._shapeInput[-1]
-        self._window = WindowFunctions.GetWindowFunction
         return self
 
     def Call(self,X):

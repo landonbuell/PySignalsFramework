@@ -158,9 +158,8 @@ class WindowFunctions :
     @staticmethod
     def WindowFunctions(functionName,nSamples):
         """ Get A window function from string identifying it """
-        windows = {"blackman":scisig.windows.blackman,
-                   ""
-                   }
+        windows = {"blackman":scisig.windows.blackman,}
+        raise NotImplementedError()
 
 
 class Plotting:
@@ -235,4 +234,5 @@ class Plotting:
         --------------------------------
         Optionally save/show plot
         """
+        raise NotImplementedError()
         return None
