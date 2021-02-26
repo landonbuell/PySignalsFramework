@@ -14,11 +14,11 @@ import numpy as np
 import scipy.signal as signal
 import scipy.fftpack as fftpack
 
-from ModulesGeneric import *
+from LayersGeneric import *
 
             #### MODULE DEFINITIONS ####
 
-class Equilizer(AbstractParentModule) :
+class Equilizer(AbstractParentLayer) :
     """
     NBandEquilize - 
         Parent Class of all N-band Equilizers

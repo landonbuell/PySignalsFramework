@@ -128,9 +128,9 @@ class AudioIO :
         if channels.upper() in ["All","BOTH","LR"]:
             return rate,data.transpose()
         elif channels.upper() in ["LEFT","L"]:
-            return rata,data.transpose()[0]
+            return rate,data.transpose()[0]
         elif channels.upper() in ["Right","R"]:
-            return rata,data.transpose()[1]
+            return rate,data.transpose()[1]
         else:
             raise ValueError("Channels keyword must be in [left,right,all]")
 

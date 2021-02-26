@@ -14,12 +14,12 @@ import numpy as np
 import scipy.signal as signal
 import scipy.fftpack as fftpack
 
-from ModulesGeneric import *
+from LayersGeneric import *
 from AudioTools import WindowFunctions
 
             #### MODULE DEFINITIONS ####
 
-class AnalysisFamesConstructor (AbstractParentModule):
+class AnalysisFamesConstructor (AbstractParentLayer):
     """
     ModuleAnalysisFrames Type - 
         Deconstruct a 1D time-domain signal into a 2D array of overlapping analysis frames
@@ -86,13 +86,13 @@ class AnalysisFamesConstructor (AbstractParentModule):
         self.SignalToFrames(X)
         return self._signal
 
-class Resample (AbstractParentModule):
+class Resample (AbstractParentLayer):
     """
 
     """
     pass
 
-class WindowFunction (AbstractParentModule):
+class WindowFunction (AbstractParentLayer):
     """
     WindowFunction Type - 
          Apply a window finction
@@ -138,7 +138,7 @@ class WindowFunction (AbstractParentModule):
         return X
 
 
-class AmplitudeEnvelope(AbstractParentModule):
+class AmplitudeEnvelope(AbstractParentLayer):
     """
 
     """

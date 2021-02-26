@@ -7,7 +7,7 @@ FXSetup
 
         #### IMPORTS ####
 
-import ModuleChain
+import LayerChain
 
         #### CLASS DEFINITIONS ####
 
@@ -19,8 +19,8 @@ class EffectsSystem:
     _name (str) : Name for user- Identification
     _type (str) : Type of EffectsSystem
     
-    _moduleChain (LinearModuleChain) : 
-    _nModules (int) : Number of modules in chain
+    _layerChain (LayerChainLinear) : 
+    _nLayers (int) : Number of modules in chain
     
     --------------------------------
     Return Instatiated EffectsSystem
@@ -29,58 +29,58 @@ class EffectsSystem:
     def __init__(self,name,modules=None,):
         """ Constructor for EffectsEummulatorSystem """
         self._name = name
-        self._type = "EffectsEmmulatorSystem"
+        self._type = "EffectsSystem"
 
-        self._moduleChain = ModuleChain.LinearModuleChain(name+"_chain")
+        self._layerChain = LayerChain.LayerChainLinear(name+"Chain")
 
     def Call(self,X):
         """ Call Each layer in chain with Inputs X """
-        currentModule = self.Input
-        while (currentModule != self._moduleChain.GetTail):
-            X = currentModule.Call(X)
-            currentModule = currentModule._next
+        currentLayer = self.Input
+        while (currentLayer != self._layerChain.GetTail):
+            X = currentLayer.Call(X)
+            currentLayer = currentLayer._next
         return X
 
     def InitializeChain(self,inputShape=None):
-        """ Initialize All modules in the Module Chain """
+        """ Initialize All modules in the Layer Chain """
         currentIndex = 1
-        currentModule = self.Input
-        self._moduleChain._head._chainIndex = 0
+        currentLayer = self.Input
+        self._layerChain._head._chainIndex = 0
         if inputShape:
-            currentModule.SetInputShape(inputShape)
-        while (currentModule != self._moduleChain.GetTail):
-            currentModule.Initialize()
-            currentModule._chainIndex = currentIndex
+            currentLayer.SetInputShape(inputShape)
+        while (currentLayer != self._layerChain.GetTail):
+            currentLayer.Initialize()
+            currentLayer._chainIndex = currentIndex
             currentIndex += 1
-            currentModule = currentModule._next
-        self._moduleChain._tail._chainIndex = currentIndex
+            currentLayer = currentLayer._next
+        self._layerChain._tail._chainIndex = currentIndex
         return self
 
-    def Add(self,newModule):
-        """ Add a new Module to this Module Chain """
-        self._moduleChain.Append(newModule)
+    def Add(self,newLayer):
+        """ Add a new Layer to this Layer Chain """
+        self._layerChain.Append(newLayer)
 
         return self
 
     @property
     def GetChainList(self):
         """ Return the EffectsSystem chain as list of modules """
-        return self._moduleChain.GetChainlist
+        return self._layerChain.GetChainlist
 
     @property
     def ChainSize(self):
         """ Return the number of elements in the chain list """
-        return len(self.__moduleChain)
+        return len(self._layerChain)
 
     @property
     def Input(self):
         """ Get input module in Chain """
-        return self._moduleChain.GetInput
+        return self._layerChain.GetInput
 
     @property
     def Output(self):
         """ Get last module in chain """
-        return self._moduleChain.GetOutput
+        return self._layerChain.GetOutput
 
     def GetInputParams(self,inputSignal):
         """ Detemrine qualities of input signal """
