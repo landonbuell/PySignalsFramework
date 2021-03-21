@@ -82,7 +82,17 @@ class AbstractParentLayer :
         """ Return the previous Layer in chain """
         return self._prev
 
-    # Local Properties
+    def CoupleToNext(self,otherLayer):
+        """ Couple to next Layer """
+        self._next = otherLayer
+        otherLayer._prev = self
+        return self
+
+    def CoupleToPrev(self,otherLayer):
+        """ Couple to Previous Layer """
+        self._prev = otherLayer
+        otherLayer._next = self
+        return self
 
     @property
     def GetSampleRate(self):
@@ -190,7 +200,8 @@ class CustomCallable (AbstractParentLayer):
     def Call(self,X):
         """ Call this Layer with inputs X """
         super().Call(X)
-        return self._callable(X,self._callArgs)
+        self._signal = self._callable(X,self._callArgs)
+        return self._signal
 
 class PlotSignal1D(AbstractParentLayer):
     """
@@ -504,4 +515,3 @@ class Equilizer(AbstractParentLayer) :
         super().Call(X)
 
         return X
-

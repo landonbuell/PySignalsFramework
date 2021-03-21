@@ -24,9 +24,7 @@
     <Compile Include="EffectsSimulator\AudioTools.py" />
     <Compile Include="EffectsSimulator\EffectsSystem.py" />
     <Compile Include="EffectsSimulator\LayerChain.py" />
-    <Compile Include="EffectsSimulator\LayersFrequencySeries.py" />
-    <Compile Include="EffectsSimulator\LayersGeneric.py" />
-    <Compile Include="EffectsSimulator\LayersTimeSeries.py" />
+    <Compile Include="EffectsSimulator\Layers.py" />
     <Compile Include="EffectsSimulator\SimulatorMain.py" />
     <Compile Include="EffectsSimulator\__init__.py" />
   </ItemGroup>
