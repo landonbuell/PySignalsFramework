@@ -21,7 +21,6 @@ class EffectsSystem:
     
     _layerChain (LayerChainLinear) : 
     _nLayers (int) : Number of modules in chain
-    
     --------------------------------
     Return Instatiated EffectsSystem
     """
@@ -75,7 +74,6 @@ class EffectsSystem:
         self.InitializeChain()
         return removedLayer
 
-    @property
     def GetChainList(self):
         """ Return the EffectsSystem chain as list of modules """
         return self._layerChain.GetChainlist

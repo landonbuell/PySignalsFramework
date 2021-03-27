@@ -7,7 +7,7 @@ LayerChain
 
             #### IMPORTS ####
 
-from LayersGeneric import *
+from Layers import *
 
             #### CLASS DEFINITIONS ####
 

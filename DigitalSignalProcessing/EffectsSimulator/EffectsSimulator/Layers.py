@@ -18,7 +18,7 @@ import AudioTools
 
             #### LAYER DEFINITIONS ####
 
-class AbstractParentLayer :
+class AbstractLayer :
     """
     AbstractLayer Type
         Abstract Base Type for all Layer Classes
@@ -44,8 +44,8 @@ class AbstractParentLayer :
         self._type = "AbstractParentLayer"      # type of this layer instance
         self._sampleRate = sampleRate           # sample rate of this layer
         self._chainIndex = None                 # index in layer chain
-        self._next = next                       # next layer in chain
-        self._prev = prev                       # previous layer in chain
+        self.CoupleToNext(next)                 # connect to next Layer
+        self.CoupleToPrev(prev)                 # connect to Previous Layer
         self._shapeInput = inputShape           # input signal Shape
         self._shapeOutput = inputShape          # output signal shape
         self._initialized = False               # T/F is chain has been initialzed
@@ -55,21 +55,26 @@ class AbstractParentLayer :
 
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this layer for usage in chain """
-        if inputShape:
-            self._shapeInput = inputShape
-            self._shapeOutput = inputShape
+        if inputShape:          # given input Shape
+            self.SetInputShape(inputShape)
+            self.SetOutputShape(inputShape)
+        elif self._shapeInput:  # input shape already defined
+            self.SetOutputShape(self.GetInputShape)
         else:
-            self._shapeInput = (1,)
-            self._shapeOutput = (1,)
-        self._signal = np.empty(shape=self.GetOutputShape)
-        self._initialized = True 
+            self.SetInputShape((1,1))
+            self.SetOutputShape((1,1))
+        self._signal = np.empty(self._shapeOutput)
         return self
 
     def Call (self,X):
         """ Call this Layer with inputs X """
-        if self._initialized == False:
-            errMsg = self.__str__() + " has not been initialized\n\t" + "Call Instance.Initialize() before use"
+        if self._initialized == False:      # Not Initialized
+            errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
             raise NotImplementedError(errMsg)
+        if (X.shape == self.GetInputShape):  # same shape
+            np.copyto(self._signal,X)
+        else:                               # different shapes
+            self._signal = np.copy(X);
         return X
 
     @property
@@ -84,14 +89,20 @@ class AbstractParentLayer :
 
     def CoupleToNext(self,otherLayer):
         """ Couple to next Layer """
-        self._next = otherLayer
-        otherLayer._prev = self
+        if otherLayer:
+            self._next = otherLayer
+            otherLayer._prev = self
+        else:
+            self._next = None
         return self
 
     def CoupleToPrev(self,otherLayer):
         """ Couple to Previous Layer """
-        self._prev = otherLayer
-        otherLayer._next = self
+        if otherLayer:
+            self._prev = otherLayer
+            otherLayer._next = self
+        else:
+            self._prev = None
         return self
 
     @property
@@ -134,6 +145,11 @@ class AbstractParentLayer :
         self._shapeOutput = x
         return self
 
+    @property
+    def GetSignal(self):
+        """ Return the Output Signal of this Layer """
+        return self._signal
+
     # Magic Methods
 
     def __str__(self):
@@ -144,7 +160,7 @@ class AbstractParentLayer :
         """ Programmer-level representation of this instance """
         return self._type + ": \'" + self._name + "\' @ " + str(self._chainIndex)
 
-class IdentityLayer (AbstractParentLayer):
+class IdentityLayer (AbstractLayer):
     """
     IdentityLayer Type - Provides no Transformation of input
         Serves as head/tail nodes of FX chain Graph
@@ -167,7 +183,7 @@ class IdentityLayer (AbstractParentLayer):
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "IdentityLayer"
 
-class CustomCallable (AbstractParentLayer):
+class CustomCallable (AbstractLayer):
     """
     CustomCallable Type - Returns User defined transformation 
     --------------------------------
@@ -200,10 +216,10 @@ class CustomCallable (AbstractParentLayer):
     def Call(self,X):
         """ Call this Layer with inputs X """
         super().Call(X)
-        self._signal = self._callable(X,self._callArgs)
+        np.copyto(self.signal,self._callable(X,self._callArgs))
         return self._signal
 
-class PlotSignal1D(AbstractParentLayer):
+class PlotSignal1D(AbstractLayer):
     """
     CustomCallable Type - Returns User defined transformation 
     --------------------------------
@@ -266,7 +282,7 @@ class PlotSignal1D(AbstractParentLayer):
         self._showFigure = x
         return self
 
-class InputLayer (AbstractParentLayer):
+class InputLayer (AbstractLayer):
     """
     ModuleAnalysisFrames Type - 
         Deconstruct a 1D time-domain signal into a 2D array of overlapping analysis frames
@@ -296,19 +312,17 @@ class InputLayer (AbstractParentLayer):
 
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this layer for usage in chain """
-        super().Initialize(inputShape=None,**kwargs)
+        super().Initialize(inputShape,**kwargs)
         # Initialize input Layer?
         return self
 
     def Call (self,X):
         """ Call this Layer with inputs X """
-        super().Call(X)
-        assert (x.ndim == 1)
-        return X
-
-class AnalysisFamesConstructor (AbstractParentLayer):
+        return super().Call(X)
+       
+class AnalysisFramesConstructor (AbstractLayer):
     """
-    ModuleAnalysisFrames Type - 
+    AnalysisFramesConstructor Type - 
         Construct 2D array of analysis frames from 1D input waveform
     --------------------------------
     _name (str) : Name for user-level identification
@@ -326,34 +340,32 @@ class AnalysisFamesConstructor (AbstractParentLayer):
     _percentOverlap (float) : Indicates percentage overlap between adjacent frames [0,1)
     _overlapSamples (int) : Number of samples overlapping
     _maxFrames (int) : Maximum number of analysis frames to use
-    _zeroPad (int) : Number of zeros to pad each analysis frame
-    _framesInUser (int) : Number of frames used by 
+    _framesInUse (int) : Number of frames used by 
+    _padTail (int) : Number of zeros to tail-pad each analysis frame
+    _padHead (int) : Number of zeros to head-pad each analysis frame
     --------------------------------
-    Return instantiated AnalysisFrames Object 
+    Return instantiated AnalysisFramesConstructor Object 
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,zeroPad=1024):
-        """ Constructor for AnalysisFames Instance """
+                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,tailPad=1024,headPad=0):
+        """ Constructor for AnalysisFamesConstructor Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "AnalysisFrameConstructor"
         self._samplesPerFrame = samplesPerFrame
         self._percentOverlap = percentOverlap
         self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
         self._maxFrames = maxFrames
-        self._zeroPad = zeroPad
         self._framesInUse = 0
-
+        self._padTail = tailPad
+        self._padHead = headPad
+        
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
-        super().Initialize(inputShape=None,**kwargs)
-        # Get the input Shape
-        if inputShape:
-            self.SetInputShape(inputShape)
-        else:
-            self.SetInputShape(self.Prev.GetOutputShape)
+        super().Initialize(inputShape,**kwargs)
+
         # format output shape
         self._shapeOutput = (self._maxFrames,
-                             self._samplesPerFrame + self._zeroPad)
+                             self._padHead + self._samplesPerFrame + self._padTail)
         self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
         self._framesInUse = 0
         self._initialized = True 
@@ -365,10 +377,10 @@ class AnalysisFamesConstructor (AbstractParentLayer):
         for i in range(self._maxFrames):
             frame = X[frameStartIndex:frameStartIndex+self._samplesPerFrame]
             try:
-                self._signal[i,0:self._samplesPerFrame] = frame
+                self._signal[i + self._padHead ,0:self._samplesPerFrame] = frame
             except ValueError:
-                self._signal[i,0:len(frame)] = frame
-                break
+                self._signal[i + self._padHead ,0:len(frame)] = frame
+                break           
             frameStartIndex += self._overlapSamples
             self._framesInUse += 1
         return self
@@ -379,13 +391,117 @@ class AnalysisFamesConstructor (AbstractParentLayer):
         self.SignalToFrames(X)
         return self._signal
 
-class ResampleLayer (AbstractParentLayer):
-    """
+    @property
+    def GetDeconstructionParams(self):
+        """ Return a List of params to deconstruct Frames into Signal """
+        params = [self._samplesPerFrame,self._percentOverlap,self._maxFrames,self._framesInUse,
+                  self._padTail,self._padHead]
+        return params
 
+class AnalysisFramesDestructor (AbstractLayer):
     """
-    pass
+    AnalysisFramesDestructor Layer Type - 
+        Destruct 2D array of analysis frames into 1D input waveform
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform   
 
-class WindowFunction (AbstractParentLayer):
+    _samplesPerFrame (int) : Number of samples used in each analysisFrame
+    _percentOverlap (float) : Indicates percentage overlap between adjacent frames [0,1)
+    _overlapSamples (int) : Number of samples overlapping
+    _maxFrames (int) : Maximum number of analysis frames to use
+    _framesInUse (int) : Number of frames used by 
+    _padTail (int) : Number of zeros to tail-pad each analysis frame
+    _padHead (int) : Number of zeros to tail-pad each analysis frame   
+    --------------------------------
+    Return instantiated AnalysisFramesDestructor Object 
+    """
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
+                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,tailPad=1024,headPad=0,
+                 deconstructParams=None):
+        """ Constructor for AnalysisFamesDestructor Instance """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "AnalysisFrameConstructor"
+        if deconstructParams:           # Parameters from AnalysisFramesConstructor
+            self.SetDeconstructionParams(deconstructParams)
+        else:
+            self._samplesPerFrame = samplesPerFrame
+            self._percentOverlap = percentOverlap
+            self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
+            self._maxFrames = maxFrames
+            self._padTail = tailPad
+            self._padHead = headPad
+            self._framesInUse = 0
+
+    def Initialize (self,inputShape=None,**kwargs):
+        """ Initialize this module for usage in chain """
+        super().Initialize(inputShape,**kwargs)
+
+        # format output shape
+        self._shapeOutput = (self._sample_samplesPerFrame * self._framesInUse,)
+        self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
+        self._framesInUse = 0
+        self._initialized = True 
+        return self
+
+    def FramesToSignal(self,X):
+        """ Convert signal X into analysis Frames """
+        frameStartIndex = 0
+        for i in range(self._framesInUse):
+            frame = X[i,self._padHead:self._padHead + self._samplesPerFrame]
+            self._signal[frameStartIndex : frameStartIndex + self._samplesPerFrame] = frame
+            frameStartIndex += self._sample_samplesPerFrame
+        return self
+
+    def Call(self, X):
+        """ Call this Module with inputs X """
+        X = super().Call(X)
+        self.FramesToSignal(X)
+        return self._signal
+
+    def SetDeconstructionParams(self,params):
+        """ Return a List of params to deconstruct Frames into Signal """
+        self._samplesPerFrame = params[0]
+        self._percentOverlap = params[1]
+        self._maxFrames = params[2]
+        self._frameInUse = params[3]
+        self._padTail = params[4]
+        self._padHead = params[5]
+        self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
+        return self
+
+class ResampleLayer (AbstractLayer):
+    """
+    Resample Layer -
+        Resample layer to 
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    Abstract class - Make no instance
+    """
+    def __init__(self,name,sampleRateNew,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for ResampleLayer instance """
+        super().__init__(name,ssampleRate,inputShape,next,prev)
+        self._sampleRateNew = sampleRateNew
+
+class WindowFunction (AbstractLayer):
     """
     WindowFunction Type - 
          Apply a window finction
@@ -401,26 +517,34 @@ class WindowFunction (AbstractParentLayer):
     _initialized (bool) : Indicates if Layer has been initialized    
     _signal (arr) : Signal from Transform  
     
-    _windowType (str) : String indicating window function type
-    _window(callable/array) : Callable
-    _windowSize (int) : Size of window function in sample    
+    _nSamples (int) : Number of samples that the window is applied to
+    _padTail (int) : Number of zeros to tail pad the window with
+    _padHead (int) : Number of zeros to head pad the window with
+    _windowSize (int) : Total window size padding + sampels
+
+    _function (call/arr) : ???
+    _window (arr) : Array of window function and padding
     --------------------------------
     Return instantiated AnalysisFrames Object 
     """
     
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 window=None,windowType=None,nSamples=None):
+                 function=None,nSamples=1024,tailPad=1024,headPad=0):
         """ Constructor for AnalysisFames Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "WindowFunctionLayer"
         
-        self._windowType = windowType
-        self._windowSize = 0
-        self._window = np.array([])
+        self._nSamples = nSamples
+        self._padTail = tailPad
+        self._padHead = headPad
+        self._windowSize = tailPad + nSamples + headPad
+
+        self._function = function
+        self._window = np.zeros(shape=(self._windowSize))
 
     def Initialize(self,inputShape=None,**kwargs):
-        super().Initialize(inputShape=None,**kwargs)
-        self._windowSize = self._shapeInput[-1]
+        super().Initialize(inputShape,**kwargs)
+        self._window = np
         return self
 
     def Call(self,X):
@@ -429,13 +553,13 @@ class WindowFunction (AbstractParentLayer):
         X = np.multiply(X,self._window,out=X)
         return X
 
-class AmplitudeEnvelope(AbstractParentLayer):
+class AmplitudeEnvelope(AbstractLayer):
     """
 
     """
     pass
 
-class DiscreteFourierTransform(AbstractParentLayer):
+class DiscreteFourierTransform(AbstractLayer):
     """
     DiscreteFourierTransform - 
         Apply Discrete Fourier Transform to input signal
@@ -450,26 +574,70 @@ class DiscreteFourierTransform(AbstractParentLayer):
     _shapeOutput (tup) : Indicates shape (and rank) of layer output
     _initialized (bool) : Indicates if Layer has been initialized    
     _signal (arr) : Signal from Transform  
-
-    _bands (list[bands]) : Bands to apply to this equilizer
-    _nBands (int) : Number of filterbands to use in EQ
     --------------------------------
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
         """ Constructor for NBandEquilizer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
 
-    def Initialize(self,*args):
+    def Initialize(self,inputShape=None,**kwargs):
         """ Initialize Current Layer """
-        super().Initialize()
+        super().Initialize(self,inputShape,**kwargs)
+        return self
+
+    def Transform(self,X):
+        """ Execute Discrete Fourier Transform on Signal X """
+        nSamples = X.shape[-1]
+        X = fftpack.fft(X,n=nSamples,axis=-1,overwrite_x=True)
+        np.copyto(self._signal,X)
         return self
 
     def Call(self,X):
         """ Call this Layer w/ Inputs X """
         super().Call(X)
-        return X
+        self.Transform(X)
+        return self._signal
 
-class Equilizer(AbstractParentLayer) :
+class InvDiscreteFourierTransform(AbstractLayer):
+    """
+    InvDiscreteFourierTransform - 
+        Apply InverseDiscrete Fourier Transform to input signal
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    """
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for NBandEquilizer Instance """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+
+    def Initialize(self,inputShape=None,**kwargs):
+        """ Initialize Current Layer """
+        super().Initialize(self,inputShape,**kwargs)
+        return self
+
+    def Transform(self,X):
+        """ Execute Discrete Fourier Transform on Signal X """
+        nSamples = X.shape[-1]
+        X = fftpack.ifft(X,n=nSamples,axis=-1,overwrite_x=True)
+        np.copyto(self._signal,X)
+        return self
+
+    def Call(self,X):
+        """ Call this Layer w/ Inputs X """
+        super().Call(X)
+        self.Transform(X)
+        return self._signal
+
+class Equilizer(AbstractLayer) :
     """
     NBandEquilizer - 
         Parent Class of all N-band Equilizers
