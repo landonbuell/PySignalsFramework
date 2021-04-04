@@ -20,46 +20,27 @@ class EffectsSystem:
     _type (str) : Type of EffectsSystem
     
     _layerChain (LayerChainLinear) : 
-    _nLayers (int) : Number of modules in chain
+    _nLayers (int) : Number of layers in chain
+
+    _isInit (bool) : T/F if layer chain is initialized for use
     --------------------------------
     Return Instatiated EffectsSystem
     """
 
-    def __init__(self,name,modules=None,):
+    def __init__(self,name,layers=None,input=None,output=None):
         """ Constructor for EffectsEummulatorSystem """
         self._name = name
         self._type = "EffectsSystem"
 
-        self._layerChain = LayerChain.LayerChainLinear(name+"Chain",modules)
+        self._layerChain = LayerChain.LayerChainLinear(name+"Chain",layers)
         self._nLayers = len(self._layerChain)
 
-    def Call(self,X):
-        """ Call Each layer in chain with Inputs X """
-        currentLayer = self.Input
-        while (currentLayer != self._layerChain.GetTail):
-            X = currentLayer.Call(X)
-            currentLayer = currentLayer._next
-        return X
+        self._isInit = False
 
-    def InitializeChain(self,inputShape=None):
+    def InitializeChain(self,inputShape):
         """ Initialize All modules in the Layer Chain """
-        currentIndex = 0
-        currentLayer = self.Input
-        if inputShape:
-            signalShape = inputShape
-        else:
-            signalShape = self.GetInputShape
-        
-        # Iterate through linked list and get 
-        while (currentLayer != self._layerChain.GetTail):
-            currentLayer.SetIndex(currentIndex)         # set the chain index
-            currentLayer.Initialize(signalShape)        # initialize with signal Shape
-            signalShape = currentLayer.GetOutputShape   # new signal shape from output
-            currentLayer = currentLayer.Next            # move to next layer
-            currentIndex += 1                           # incr layer counter
-        # Set index for head & tail nodes
-        self.Input.Prev.SetIndex(-1)
-        self.Output.Next.SetIndex(currentIndex)         
+        self._layerChain.Initialize(inputShape)
+        self._isInit = True
         return self
 
     def Add(self,newLayer):
@@ -73,6 +54,17 @@ class EffectsSystem:
         removedLayer =  self._layerChain.PopFromTail()
         self.InitializeChain()
         return removedLayer
+
+    def Call(self,X):
+        """ Call Each layer in chain with Inputs X """
+        if (X.shape != self.GetInputShape):     # shapes are not equal
+            self.InitializeChain(X.shape)       # Re-init Chain w/ shape
+
+        currentLayer = self.Input
+        while (currentLayer != self._layerChain.GetTail):
+            X = currentLayer.Call(X)
+            currentLayer = currentLayer._next
+        return X
 
     def GetChainList(self):
         """ Return the EffectsSystem chain as list of modules """

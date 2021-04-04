@@ -35,6 +35,8 @@ if __name__ == "__main__":
     System.Add(Layers.AnalysisFramesConstructor("ToFrames",inputShape=(1,nSamples),
                                                   samplesPerFrame=2048,percentOverlap=0.75,
                                                   maxFrames=512,tailPad=2048,headPad=0))
+
+
     System.InitializeChain()
 
     signalProcessed = System.Call(signalRaw)

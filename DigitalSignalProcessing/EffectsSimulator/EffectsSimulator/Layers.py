@@ -41,7 +41,7 @@ class AbstractLayer :
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
         """ Constructor for AbstractLayer Parent Class """
         self._name = name                       # name of this layer instance
-        self._type = "AbstractParentLayer"      # type of this layer instance
+        self._type = "AbstractLayer"            # type of this layer instance
         self._sampleRate = sampleRate           # sample rate of this layer
         self._chainIndex = None                 # index in layer chain
         self.CoupleToNext(next)                 # connect to next Layer
@@ -53,16 +53,10 @@ class AbstractLayer :
                              
     # Methods
 
-    def Initialize (self,inputShape=None,**kwargs):
+    def Initialize (self,inputShape,**kwargs):
         """ Initialize this layer for usage in chain """
-        if inputShape:          # given input Shape
-            self.SetInputShape(inputShape)
-            self.SetOutputShape(inputShape)
-        elif self._shapeInput:  # input shape already defined
-            self.SetOutputShape(self.GetInputShape)
-        else:
-            self.SetInputShape((1,1))
-            self.SetOutputShape((1,1))
+        self.SetInputShape(inputShape)
+        self.SetOutputShape(inputShape)
         self._signal = np.empty(self._shapeOutput)
         return self
 
@@ -71,11 +65,9 @@ class AbstractLayer :
         if self._initialized == False:      # Not Initialized
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
             raise NotImplementedError(errMsg)
-        if (X.shape == self.GetInputShape):  # same shape
-            np.copyto(self._signal,X)
-        else:                               # different shapes
-            self._signal = np.copy(X);
-        return X
+        
+        self._signal = np.copy(X);
+        return self._signal
 
     @property
     def Next(self):
@@ -237,11 +229,12 @@ class PlotSignal1D(AbstractLayer):
     _savePath (str) : Local path where plot of 1D signal is exported to
     _figureName (str) : Name to save local plots
     _showFigure (bool) : If True, figures is displayed to console
+    _saveFigure (bool) : If True, figures is saved to local drive
     --------------------------------
     """
 
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 figurePath=None,figureName=None,show=False):
+                 figurePath=None,figureName=None,show=False,save=True):
         """ Constructor for AbstractLayer Parent Class """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "PlotSignal1"
@@ -255,6 +248,7 @@ class PlotSignal1D(AbstractLayer):
         else:
             self._figureName = "Signal1D"
         self._showFigure = show
+        self._saveFigure = save
 
     def Call(self,X):
         """ Call current layer with inputs X """
@@ -274,18 +268,28 @@ class PlotSignal1D(AbstractLayer):
     
     @property
     def GetShowStatus(self):
-        """ Get if figure is shown to console """
+        """ Get T/F if figure is shown to console """
         return self._showFigure
 
     def SetShowStatus(self,x):
-        """ Set if figure is shown to console """
+        """ Set T/F if figure is shown to console """
         self._showFigure = x
+        return self
+    
+    @property
+    def GetSaveStatus(self):
+        """ Get T/F if Figure is saved to local Path """
+        return self._saveFigure
+
+    def SetSaveStatus(self,x):
+        """ Set T/F if figure is saved to local Path """
+        self._saveFigure = x
         return self
 
 class InputLayer (AbstractLayer):
     """
-    ModuleAnalysisFrames Type - 
-        Deconstruct a 1D time-domain signal into a 2D array of overlapping analysis frames
+   InputLayer Type - 
+        Holds Input Signal For Processing
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -343,6 +347,7 @@ class AnalysisFramesConstructor (AbstractLayer):
     _framesInUse (int) : Number of frames used by 
     _padTail (int) : Number of zeros to tail-pad each analysis frame
     _padHead (int) : Number of zeros to head-pad each analysis frame
+    _frameSize (int) : Size of each frame, includes samples + padding
     --------------------------------
     Return instantiated AnalysisFramesConstructor Object 
     """
@@ -358,14 +363,14 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._framesInUse = 0
         self._padTail = tailPad
         self._padHead = headPad
+        self._frameSize = self._padTaHead + self._samplesPerFrame + self._padTail
         
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
         super().Initialize(inputShape,**kwargs)
 
         # format output shape
-        self._shapeOutput = (self._maxFrames,
-                             self._padHead + self._samplesPerFrame + self._padTail)
+        self._shapeOutput = (self._maxFrames,self._frameSize)
         self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
         self._framesInUse = 0
         self._initialized = True 
@@ -388,6 +393,7 @@ class AnalysisFramesConstructor (AbstractLayer):
     def Call(self, X):
         """ Call this Module with inputs X """
         X = super().Call(X)
+        self._framesInUse = 0
         self.SignalToFrames(X)
         return self._signal
 
@@ -421,6 +427,7 @@ class AnalysisFramesDestructor (AbstractLayer):
     _framesInUse (int) : Number of frames used by 
     _padTail (int) : Number of zeros to tail-pad each analysis frame
     _padHead (int) : Number of zeros to tail-pad each analysis frame   
+    _frameSize (int) : Size of each frame, includes samples + padding
     --------------------------------
     Return instantiated AnalysisFramesDestructor Object 
     """
@@ -440,6 +447,7 @@ class AnalysisFramesDestructor (AbstractLayer):
             self._padTail = tailPad
             self._padHead = headPad
             self._framesInUse = 0
+        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
 
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
@@ -520,7 +528,7 @@ class WindowFunction (AbstractLayer):
     _nSamples (int) : Number of samples that the window is applied to
     _padTail (int) : Number of zeros to tail pad the window with
     _padHead (int) : Number of zeros to head pad the window with
-    _windowSize (int) : Total window size padding + sampels
+    _frameSize (int) : Size of each frame, includes samples + padding
 
     _function (call/arr) : ???
     _window (arr) : Array of window function and padding
@@ -537,7 +545,7 @@ class WindowFunction (AbstractLayer):
         self._nSamples = nSamples
         self._padTail = tailPad
         self._padHead = headPad
-        self._windowSize = tailPad + nSamples + headPad
+        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
 
         self._function = function
         self._window = np.zeros(shape=(self._windowSize))
@@ -552,6 +560,13 @@ class WindowFunction (AbstractLayer):
         X = super().Call(X)
         X = np.multiply(X,self._window,out=X)
         return X
+
+    def SetDeconstructionParams(self,params):
+        """ Return a List of params to deconstruct Frames into Signal """
+        self._samplesPerFrame = params[0]
+        self._padTail = params[4]
+        self._padHead = params[5]
+        return self
 
 class AmplitudeEnvelope(AbstractLayer):
     """

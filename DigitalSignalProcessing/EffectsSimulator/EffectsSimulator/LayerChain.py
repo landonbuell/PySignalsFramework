@@ -21,6 +21,8 @@ class LayerChainLinear :
     _head (LayerAbstract) : Head Layer in Chain [readonly]
     _tail (LayerAbstract) : Tail Layer in Chain [readonly]
 
+    _size (int) : Number of non-sentinel nodes in Layer
+
     --------------------------------
     Return Instantiated LinearLayerChain
     """
@@ -30,12 +32,13 @@ class LayerChainLinear :
         self._type = "LayerChainLinear"
         self._head = IdentityLayer("HeadNode")
         self._tail = IdentityLayer("TailNode")
+        self._size = 0
        
         if existingLayers:
             # If given a list of layers
             if type(existingLayers) == list:   
                 self.AssembleFromList(existingLayers)
-            elif type(existingLayers) == AbstractParentLayer:
+            elif type(existingLayers) == AbstractLayer:
                 self.AssembleFromNode(existingLayers)
             else:
                 errMsg = "Existing layer must be of type List or AbstractParentLayer, but got {0}".format(type(existingLayers))
@@ -67,6 +70,7 @@ class LayerChainLinear :
         newLayer._prev = oldTail
         newLayer._next = self._tail
         self._tail._prev = newLayer
+        self._size += 1
         return self
 
     def Prepend(self,newLayer):
@@ -76,6 +80,7 @@ class LayerChainLinear :
         newLayer._next = oldHead
         newLayer._prev = self._head
         self._head._next = newLayer
+        self._size += 1
         return self
 
     def PopFromTail(self):
@@ -87,6 +92,7 @@ class LayerChainLinear :
             newOutput = oldOutput.Prev
             self.GetTail.SetPrev(newOutput)
             newOutput.SetNext(self.GetTail)
+            self._size -= 1
         return oldOutput
 
     def PopFromHead(self):
@@ -96,9 +102,30 @@ class LayerChainLinear :
         else:
             oldInput = self.GetInput
             newInput = oldInput.Next
-            self.GetHEad.SetNext(newInput)
+            self.GetHead.SetNext(newInput)
             newInput.SetPrev(self.GetHead)
+            self._size -= 1
         return oldInput
+
+    def Initialize(self,inputShape):
+        """ Initialize layer Chain For Usage """
+        if (self._size == 0):   # nothing to init
+            return self         
+
+        currentIdx = 0
+        currentLayer = self.GetInput
+        while(currLayer != self.GetOutput):     # visit each node in the chain
+            currentLayer.SetIndex(currentIdx)   # set layer index
+            currentLayer.Initialize(inputShape) # init with input Shape
+
+            inputShape = currentLayer.GetOutputShape    # Get new signal shape
+            currentLayer = currentLayer.Next            # Layer Layer in the chain
+            currentIdx += 1                     # inc index
+        # Set Index for Head + Tail Nodes
+        self.GetHead.SetIndex(-1)
+        self.GetTail.SetIndex(-1)
+        return self
+        
 
     def Call(self,X):
         """ Call layer Chain w/ inputs X """
@@ -111,12 +138,18 @@ class LayerChainLinear :
     @property
     def GetInput (self):
         """ Return Input of Layer Chain """
-        return self._head._next
+        if _size == 0:
+            return None
+        else:
+            return self._head._next
 
     @property
     def GetOutput(self):
         """ Return Output of Layer Chain """
-        return self._tail._prev
+        if _size == 0:
+            return None
+        else:
+            return self._tail._prev
 
     @property
     def GetHead(self):
@@ -146,7 +179,7 @@ class LayerChainLinear :
 
     def __len__(self):
         """ Get Length of this Layer chain """
-        return len(self.GetChainList)
+        return _size;
 
     def __str__(self):
         """ string-level representation of this instance """
@@ -155,16 +188,4 @@ class LayerChainLinear :
     def __repr__(self):
         """ Programmer-level representation of this instance """
         return self._type + ": \'" + self._name + "\' w/ " + str(len(self)) + " nodes"
-
-class LayerChainTools :
-    """
-    Class of Tools to traverse and Interact with a Layers or Chain 
-    """
-
-    @staticmethod
-    def TraverseLayerChain(currentLayer):
-        """ Traverse a chain of layers, return tail node """
-        while currentLayer._next != None:
-            currentLayer = currentLayer._next
-        return currentLayer
 
