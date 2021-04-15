@@ -2,15 +2,16 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>465be1c8-01d5-4e12-a7ef-585290fbf421</ProjectGuid>
+    <ProjectGuid>3152e0f2-264a-4e46-acac-663ac9058d41</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>EffectsSimulator\SimulatorMain.py</StartupFile>
+    <StartupFile>PySignalsFramework\SimulatorMain.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
-    <Name>EffectsSimulator</Name>
-    <RootNamespace>EffectsSimulator</RootNamespace>
+    <Name>Source</Name>
+    <RootNamespace>Source</RootNamespace>
+    <IsWindowsApplication>False</IsWindowsApplication>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -21,15 +22,15 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="EffectsSimulator\AudioTools.py" />
-    <Compile Include="EffectsSimulator\EffectsSystem.py" />
-    <Compile Include="EffectsSimulator\LayerChain.py" />
-    <Compile Include="EffectsSimulator\Layers.py" />
-    <Compile Include="EffectsSimulator\SimulatorMain.py" />
-    <Compile Include="EffectsSimulator\__init__.py" />
+    <Compile Include="PySignalsFramework\AudioTools.py" />
+    <Compile Include="PySignalsFramework\EffectsSystem.py" />
+    <Compile Include="PySignalsFramework\LayerChain.py" />
+    <Compile Include="PySignalsFramework\Layers.py" />
+    <Compile Include="PySignalsFramework\SimulatorMain.py" />
+    <Compile Include="PySignalsFramework\__init__.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="EffectsSimulator\" />
+    <Folder Include="PySignalsFramework\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

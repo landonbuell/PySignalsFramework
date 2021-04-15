@@ -26,7 +26,7 @@ class EffectsSystem:
     --------------------------------
     Return Instatiated EffectsSystem
     """
-
+    
     def __init__(self,name,layers=None,input=None,output=None):
         """ Constructor for EffectsEummulatorSystem """
         self._name = name
@@ -47,16 +47,20 @@ class EffectsSystem:
         """ Add a new Layer to this Layer Chain """
         self._layerChain.Append(newLayer)
         self._nLayers += 1
+        self._isInit = False
         return self
 
     def Pop(self):
         """ Remove a layer from the end of the layer chain """
         removedLayer =  self._layerChain.PopFromTail()
-        self.InitializeChain()
+        self._nLayers -= 1;
+        self._isInit = False
         return removedLayer
 
     def Call(self,X):
         """ Call Each layer in chain with Inputs X """
+        if (self._isInit != True):
+            raise Exception("Chain No Initialized!")
         if (X.shape != self.GetInputShape):     # shapes are not equal
             self.InitializeChain(X.shape)       # Re-init Chain w/ shape
 
@@ -68,7 +72,7 @@ class EffectsSystem:
 
     def GetChainList(self):
         """ Return the EffectsSystem chain as list of modules """
-        return self._layerChain.GetChainlist
+        return self._layerChain.GetChainlist()
 
     @property
     def ChainSize(self):

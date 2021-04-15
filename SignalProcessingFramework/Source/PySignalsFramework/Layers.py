@@ -64,8 +64,7 @@ class AbstractLayer :
         """ Call this Layer with inputs X """
         if self._initialized == False:      # Not Initialized
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
-            raise NotImplementedError(errMsg)
-        
+            raise NotImplementedError(errMsg)       
         self._signal = np.copy(X);
         return self._signal
 
@@ -286,10 +285,10 @@ class PlotSignal1D(AbstractLayer):
         self._saveFigure = x
         return self
 
-class InputLayer (AbstractLayer):
+class IOLayer (AbstractLayer):
     """
-   InputLayer Type - 
-        Holds Input Signal For Processing
+   IOLayer Type - 
+        Holds Input/Output Signals For Processing
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -310,7 +309,7 @@ class InputLayer (AbstractLayer):
         if not inputShape:
             raise ValueError("input shape must be provdied (cannot be \'None\')")
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "InputLayer"
+        self._type = "IOLayer"
 
     # Methods
 

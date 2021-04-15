@@ -30,8 +30,8 @@ class LayerChainLinear :
         """ Constructor for LinearLayerChain Instance """
         self._name = name
         self._type = "LayerChainLinear"
-        self._head = IdentityLayer("HeadNode")
-        self._tail = IdentityLayer("TailNode")
+        self._head = IOLayer("HeadNode")
+        self._tail = IOLayer("TailNode")
         self._size = 0
        
         if existingLayers:
@@ -56,11 +56,10 @@ class LayerChainLinear :
     def AssembleFromNode(self,layerNode):
         """ Assmble a layer chain from single node to end """
         currentLayer = layerNode        
-        while True:
-            self.Append(currentLayer)
-            if currentLayer._next is None: 
-                break
-            currentLayer = currentLayer._next
+        self.HeadNode.CoupleToNext(layerNode)
+        while (currentLayer.Next != None)
+            currentLayer = currentLayer.Next
+        self.TaiLNode.CoupleToPrev(currentLayer)
         return self
 
     def Append (self,newLayer):
@@ -161,7 +160,6 @@ class LayerChainLinear :
         """ Return tail Layer of Chain """
         return self._tail
 
-    @property
     def GetChainList(self):
         """ Return the Lienar Chain Layers as a List """
         chainList = []
