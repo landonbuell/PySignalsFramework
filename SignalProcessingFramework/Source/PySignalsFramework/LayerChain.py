@@ -57,7 +57,7 @@ class LayerChainLinear :
         """ Assmble a layer chain from single node to end """
         currentLayer = layerNode        
         self.HeadNode.CoupleToNext(layerNode)
-        while (currentLayer.Next != None)
+        while (currentLayer.Next):
             currentLayer = currentLayer.Next
         self.TaiLNode.CoupleToPrev(currentLayer)
         return self
