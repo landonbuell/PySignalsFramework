@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3152e0f2-264a-4e46-acac-663ac9058d41</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PySignalsFramework\SimulatorMain.py</StartupFile>
+    <StartupFile>SimulatorMain.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -26,7 +26,7 @@
     <Compile Include="PySignalsFramework\EffectsSystem.py" />
     <Compile Include="PySignalsFramework\LayerChain.py" />
     <Compile Include="PySignalsFramework\Layers.py" />
-    <Compile Include="PySignalsFramework\SimulatorMain.py" />
+    <Compile Include="SimulatorMain.py" />
     <Compile Include="PySignalsFramework\__init__.py" />
   </ItemGroup>
   <ItemGroup>

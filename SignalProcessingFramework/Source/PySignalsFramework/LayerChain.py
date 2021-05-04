@@ -7,7 +7,7 @@ LayerChain
 
             #### IMPORTS ####
 
-from Layers import *
+import PySignalsFramework.Layers as Layers
 
             #### CLASS DEFINITIONS ####
 
@@ -30,15 +30,15 @@ class LayerChainLinear :
         """ Constructor for LinearLayerChain Instance """
         self._name = name
         self._type = "LayerChainLinear"
-        self._head = IOLayer("HeadNode")
-        self._tail = IOLayer("TailNode")
+        self._head = Layers.IOLayer("HeadNode")
+        self._tail = Layers.IOLayer("TailNode")
         self._size = 0
        
         if existingLayers:
             # If given a list of layers
             if type(existingLayers) == list:   
                 self.AssembleFromList(existingLayers)
-            elif type(existingLayers) == AbstractLayer:
+            elif type(existingLayers) == Layers.AbstractLayer:
                 self.AssembleFromNode(existingLayers)
             else:
                 errMsg = "Existing layer must be of type List or AbstractParentLayer, but got {0}".format(type(existingLayers))
@@ -59,26 +59,38 @@ class LayerChainLinear :
         self.HeadNode.CoupleToNext(layerNode)
         while (currentLayer.Next):
             currentLayer = currentLayer.Next
-        self.TaiLNode.CoupleToPrev(currentLayer)
+        self.TailNode.CoupleToPrev(currentLayer)
         return self
 
     def Append (self,newLayer):
         """ Append a new Layer to the tail of this Chain """
-        oldTail = self.GetOutput
-        oldTail._next = newLayer
-        newLayer._prev = oldTail
-        newLayer._next = self._tail
-        self._tail._prev = newLayer
+        if (self._size == 0):
+            self._head._next = newLayer
+            self._tail._prev = newLayer
+            newLayer._prev = self.GetHead
+            newLayer._next = self.GetTail
+        else:
+            oldTail = self.GetOutput
+            oldTail._next = newLayer
+            newLayer._prev = oldTail
+            newLayer._next = self._tail
+            self._tail._prev = newLayer
         self._size += 1
         return self
 
     def Prepend(self,newLayer):
         """ Prepend a new Layer to the head of this chain """
-        oldHead = self.GetInput
-        oldHead._prev = newLayer
-        newLayer._next = oldHead
-        newLayer._prev = self._head
-        self._head._next = newLayer
+        if (self._size == 0):
+            self._head._next = newLayer
+            self._tail._prev = newLayer
+            newLayer.Prev = self.GetHead
+            newLayer.Next = self.GetTail
+        else:
+            oldHead = self.GetInput
+            oldHead._prev = newLayer
+            newLayer._next = oldHead
+            newLayer._prev = self._head
+            self._head._next = newLayer
         self._size += 1
         return self
 
@@ -113,7 +125,7 @@ class LayerChainLinear :
 
         currentIdx = 0
         currentLayer = self.GetInput
-        while(currLayer != self.GetOutput):     # visit each node in the chain
+        while(currentLayer != self.GetOutput):     # visit each node in the chain
             currentLayer.SetIndex(currentIdx)   # set layer index
             currentLayer.Initialize(inputShape) # init with input Shape
 
@@ -137,16 +149,16 @@ class LayerChainLinear :
     @property
     def GetInput (self):
         """ Return Input of Layer Chain """
-        if _size == 0:
-            return None
+        if self._size == 0:
+            return self._head
         else:
             return self._head._next
 
     @property
     def GetOutput(self):
         """ Return Output of Layer Chain """
-        if _size == 0:
-            return None
+        if self._size == 0:
+            return self._tail
         else:
             return self._tail._prev
 
@@ -171,13 +183,13 @@ class LayerChainLinear :
 
     def CopyChain(self,newName):
         """ Return a Non-aliased copy of this FX Chain """
-        return LayerChainLinear(newName,self.GetChainList)
+        return LayerChainLinear(newName,self.GetChainList())
 
     # Magic Methods
 
     def __len__(self):
         """ Get Length of this Layer chain """
-        return _size;
+        return self._size;
 
     def __str__(self):
         """ string-level representation of this instance """

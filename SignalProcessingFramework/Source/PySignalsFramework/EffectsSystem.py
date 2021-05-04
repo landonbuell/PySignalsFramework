@@ -7,7 +7,7 @@ FXSetup
 
         #### IMPORTS ####
 
-import LayerChain
+import PySignalsFramework.LayerChain as LayerChain
 
         #### CLASS DEFINITIONS ####
 
@@ -67,7 +67,7 @@ class EffectsSystem:
         currentLayer = self.Input
         while (currentLayer != self._layerChain.GetTail):
             X = currentLayer.Call(X)
-            currentLayer = currentLayer._next
+            currentLayer = currentLayer.Next
         return X
 
     def GetChainList(self):

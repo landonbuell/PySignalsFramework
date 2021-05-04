@@ -14,7 +14,7 @@ import numpy as np
 import scipy.signal as signal
 import scipy.fftpack as fftpack
 
-import AudioTools
+import PySignalsFramework.AudioTools as AudioTools
 
             #### LAYER DEFINITIONS ####
 
@@ -65,8 +65,19 @@ class AbstractLayer :
         if self._initialized == False:      # Not Initialized
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
             raise NotImplementedError(errMsg)       
-        self._signal = np.copy(X);
-        return self._signal
+        if (X.shape == self._signal.shape):
+            self._signal = np.copy(X);
+            return self._signal
+        else:
+            return X
+
+    def Describe(self,detail=1):
+        """ Desribe This layer in desired detail """
+        print("-"*128)
+        print("Name: {0} Type: {1}".format(self._name,type(self)))
+
+        print("-"*128)
+        return None
 
     @property
     def Next(self):
@@ -117,7 +128,7 @@ class AbstractLayer :
         return self
 
     @property
-    def InputShape(self):
+    def GetInputShape(self):
         """ Get the input shape of this layer """
         return self._shapeInput
 
@@ -127,7 +138,7 @@ class AbstractLayer :
         return self
 
     @property
-    def OutputShape(self):
+    def GetOutputShape(self):
         """ Get The output shape of this layer """
         return self._shapeOutput
 
@@ -236,7 +247,7 @@ class PlotSignal1D(AbstractLayer):
                  figurePath=None,figureName=None,show=False,save=True):
         """ Constructor for AbstractLayer Parent Class """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "PlotSignal1"
+        self._type = "PlotSignal1D"
 
         if figurePath:
             self._figurePath = figurePath           
@@ -254,15 +265,14 @@ class PlotSignal1D(AbstractLayer):
         super().Call(X)
         figureExportPath = os.path.join(self._figurePath,self._figureName)
         cntr = 0
-        while True:
+        """while True:
             if os.path.isfile(figureExportPath):
                 # the file already exists
                 figureExportPath += str(cntr)
             else:
-                figureExportPath += str(cntr)
+                figureExportPath += str(cntr) """
         xData = np.arange(X.shape) / self._sampleRate
-        AudioTools.Plotting.PlotGeneric(xData,X,
-                                        save=figureExportPath,show=self._show)
+        AudioTools.Plotting.PlotGeneric(xData,X,save=figureExportPath,show=self._show)
         return X
     
     @property
@@ -306,8 +316,6 @@ class IOLayer (AbstractLayer):
 
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
         """ Constructor for AnalysisFames Instance """
-        if not inputShape:
-            raise ValueError("input shape must be provdied (cannot be \'None\')")
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "IOLayer"
 
@@ -362,7 +370,7 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._framesInUse = 0
         self._padTail = tailPad
         self._padHead = headPad
-        self._frameSize = self._padTaHead + self._samplesPerFrame + self._padTail
+        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
         
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
@@ -380,11 +388,13 @@ class AnalysisFramesConstructor (AbstractLayer):
         frameStartIndex = 0
         for i in range(self._maxFrames):
             frame = X[frameStartIndex:frameStartIndex+self._samplesPerFrame]
-            try:
-                self._signal[i + self._padHead ,0:self._samplesPerFrame] = frame
-            except ValueError:
-                self._signal[i + self._padHead ,0:len(frame)] = frame
-                break           
+            if (frame.shape == (self._samplesPerFrame,)):
+                # Frame has correct shape
+                self._signal[i , self._padHead:self._padTail] = frame
+            else:
+                # frame has incorrect shape
+                self._signal[i , self._padHead:self._padHead + frame.shape[0]] = frame
+                break
             frameStartIndex += self._overlapSamples
             self._framesInUse += 1
         return self
@@ -544,20 +554,22 @@ class WindowFunction (AbstractLayer):
         self._nSamples = nSamples
         self._padTail = tailPad
         self._padHead = headPad
-        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
-
-        self._function = function
-        self._window = np.zeros(shape=(self._windowSize))
+        self._frameSize = self._padHead + self._nSamples + self._padTail
+        
+        self._function = function;
+        self._window = np.zeros(shape=self._frameSize)
+        self._window[self._padHead:self._padTail] = self._function(self._nSamples)
 
     def Initialize(self,inputShape=None,**kwargs):
+        """ Initialize Layer for Usage """
         super().Initialize(inputShape,**kwargs)
-        self._window = np
+        self._isInit = True
         return self
 
     def Call(self,X):
         """ Call this module with inputs X """
         X = super().Call(X)
-        X = np.multiply(X,self._window,out=X)
+        np.multiply(X,self._window,out=X)
         return X
 
     def SetDeconstructionParams(self,params):

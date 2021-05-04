@@ -14,7 +14,7 @@ import scipy.io as scio
 
                 #### CLASS DEFINITIONS ####
 
-class SimpleWavesGenerator :
+class WavesGenerator :
     """
     SimpleWaves Type - Methods to create signals of any length and component frequencies 
     --------------------------------
@@ -116,6 +116,41 @@ class SimpleWavesGenerator :
         """ Get Phase Shift values """
         return self._phas
 
+class SimpleWavesGenerator:
+    """
+    Static Class of methods to Generate Simple Waveforms
+    """
+
+    @staticmethod
+    def CosineWave(amp,freq,time,phase):
+        """ Create Cosine wave given class attributes """
+        signal = amp*np.cos(2*np.pi*freq*time + phase)
+        return signal
+
+    @staticmethod
+    def SineWave(amp,freq,time,phase):
+        """ Create Sine wave given class attributes """
+        signal = amp*np.sin(2*np.pi*freq*time + phase)
+        return signal
+
+    @staticmethod
+    def SquareWave(amp,freq,time,phase):
+        """ Create Square wave given class attributes """
+        signal = amp*scisig.square(2*np.pi*freq*time + phase)
+        return signal
+
+    @staticmethod
+    def SawtoothWave(amp,freq,time,phase):
+        """ Create Sawtooth wave given class attributes """
+        signal = amp*scisig.sawtooth(2*np.pi*freq*time + phase)
+        return signal
+
+    @staticmethod
+    def TriangleWave(amp,freq,time,phase):
+        """ Create Triangle wave given class attributes """
+        signal = scisig.sawtooth(2*np.pi*freq*time + phase,width=0.5)
+        return signal
+
 class AudioIO :
     """
     Static Class of methods to Input/Output
@@ -160,6 +195,16 @@ class WindowFunctions :
         """ Get A window function from string identifying it """
         windows = {"blackman":scisig.windows.blackman,}
         raise NotImplementedError()
+
+    @staticmethod
+    def HanningWindow(nSamples):
+        """ Get Hanning Window that is nSamples Long """
+        return scisig.windows.hann(nSamples)
+
+    @staticmethod
+    def GaussianWindow(nSamples):
+        """ Get Hanning Window that is nSamples Long """
+        return scisig.windows.gaussian(nSamples)
 
 
 class Plotting:
