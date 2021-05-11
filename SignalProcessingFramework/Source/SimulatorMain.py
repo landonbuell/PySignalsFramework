@@ -36,13 +36,20 @@ if __name__ == "__main__":
     WindowLayer = Layers.WindowFunction("Hanning",nSamples=1024,tailPad=2048,headPad=1024,
                                         function=AudioTools.WindowFunctions.HanningWindow)
 
-    PlotLayer = Layers.PlotSignal1D("Plot",show=True)
+    DFTLayer = Layers.DiscreteFourierTransform("DFTLayer",)
+
+    PlotLayer1 = Layers.PlotSignal("PlotFrames",show=True)
+    PlotLayer2 = Layers.PlotSignal("PlotWindow",show=True)
+    PlotLayer3 = Layers.PlotSignal("PlotFrequency",show=True)
+    PlotLayer4 = Layers.PlotSignal("PlotWindow",show=True)
 
 
     # Add Layers to the System
     System.Add(FramesLayer)
+    System.Add(PlotLayer1)
     System.Add(WindowLayer)
-    System.Add(PlotLayer)
+    System.Add(PlotLayer2)
+    System.Add(DFTLayer)
 
     System.InitializeChain(inputShape=(nSamples,))
 

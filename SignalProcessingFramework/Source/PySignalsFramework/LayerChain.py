@@ -13,7 +13,8 @@ import PySignalsFramework.Layers as Layers
 
 class LayerChainLinear :
     """ 
-    Linear Layer Chain Type - Acts as double inked list
+    Linear Layer Chain Type - 
+        Acts as double Linked list of Layers
     --------------------------------
     _name (str) : 
     _type (str) : Type of Layer Chain
@@ -22,7 +23,6 @@ class LayerChainLinear :
     _tail (LayerAbstract) : Tail Layer in Chain [readonly]
 
     _size (int) : Number of non-sentinel nodes in Layer
-
     --------------------------------
     Return Instantiated LinearLayerChain
     """
@@ -47,6 +47,8 @@ class LayerChainLinear :
             self._head._next = self._tail
             self._tail._prev = self._head
 
+    """ Private Methods """
+
     def AssembleFromList(self,layerList):
         """ Assemble a layer chain from list of unconnected layers """
         for layer in layerList:
@@ -61,6 +63,8 @@ class LayerChainLinear :
             currentLayer = currentLayer.Next
         self.TailNode.CoupleToPrev(currentLayer)
         return self
+
+    """ Public Interface """
 
     def Append (self,newLayer):
         """ Append a new Layer to the tail of this Chain """
@@ -125,7 +129,7 @@ class LayerChainLinear :
 
         currentIdx = 0
         currentLayer = self.GetInput
-        while(currentLayer != self.GetOutput):     # visit each node in the chain
+        while(currentLayer != self.GetTail):    # visit each node in the chain
             currentLayer.SetIndex(currentIdx)   # set layer index
             currentLayer.Initialize(inputShape) # init with input Shape
 
@@ -137,14 +141,19 @@ class LayerChainLinear :
         self.GetTail.SetIndex(-1)
         return self
         
-
     def Call(self,X):
         """ Call layer Chain w/ inputs X """
         currentLayer = self.GetInput
-        while (currentLayer != self._tail):
+        while (currentLayer != self.GetTail):
             X = currentLayer.Call(X)
-            currentLayer = currentLayer._next
+            currentLayer = currentLayer.Next
         return X
+
+    def CopyChain(self,newName):
+        """ Return a Non-aliased copy of this FX Chain """
+        return LayerChainLinear(newName,self.GetChainList())
+
+    """ Getter & Setter Methods """
 
     @property
     def GetInput (self):
@@ -181,11 +190,24 @@ class LayerChainLinear :
             currentLayer = currentLayer._next
         return chainList
 
-    def CopyChain(self,newName):
-        """ Return a Non-aliased copy of this FX Chain """
-        return LayerChainLinear(newName,self.GetChainList())
+    def SetSampleRate(self,x):
+        """ Set All Layers to have same sample rate """
+        currentLayer = self.GetHead
+        while(currentLayer != None):
+            if (type(currentLayer != ResampleLayer)):
+                currentLayer.SetSampleRate(x)
+            else:
+                break
+        return self
 
-    # Magic Methods
+    """ Magic Methods """
+
+    def __iter__(self):
+        """ Iterate through this Layer chain """
+        currentLayer = self.GetInput
+        while (currentLayer != self._tail):
+            yield ccurrentLayer
+            currentLayer = currentLayer._next
 
     def __len__(self):
         """ Get Length of this Layer chain """

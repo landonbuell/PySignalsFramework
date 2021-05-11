@@ -37,11 +37,7 @@ class EffectsSystem:
 
         self._isInit = False
 
-    def InitializeChain(self,inputShape):
-        """ Initialize All modules in the Layer Chain """
-        self._layerChain.Initialize(inputShape)
-        self._isInit = True
-        return self
+    """ Public Interface """
 
     def Add(self,newLayer):
         """ Add a new Layer to this Layer Chain """
@@ -57,21 +53,41 @@ class EffectsSystem:
         self._isInit = False
         return removedLayer
 
+    def InitializeChain(self,inputShape):
+        """ Initialize All modules in the Layer Chain """
+        self._layerChain.Initialize(inputShape)
+        self._isInit = True
+        return self
+
     def Call(self,X):
         """ Call Each layer in chain with Inputs X """
         if (self._isInit != True):
-            raise Exception("Chain No Initialized!")
+            raise Exception("Chain Not Initialized!")
         if (X.shape != self.GetInputShape):     # shapes are not equal
             self.InitializeChain(X.shape)       # Re-init Chain w/ shape
 
-        currentLayer = self.Input
-        while (currentLayer != self._layerChain.GetTail):
-            X = currentLayer.Call(X)
-            currentLayer = currentLayer.Next
+        # Call the Layer Chain
+        X = self._layerChain.Call(X)
         return X
+       
+    """ Getter & Setter Methods """
 
-    def GetChainList(self):
-        """ Return the EffectsSystem chain as list of modules """
+    @property
+    def Name(self):
+        """ Get the Name of this Effects System """
+        return self._name
+
+    @property
+    def Type(self):
+        """ Get Type of this Effects System """
+        return self._type
+
+    def GetLayerChainInst(self):
+        """ Get the LayerChain as the Instance """
+        return self._layerChain
+
+    def GetLayerChainList(self):
+        """ Get the LayerChain as a List """
         return self._layerChain.GetChainlist()
 
     @property
@@ -81,12 +97,12 @@ class EffectsSystem:
 
     @property
     def Input(self):
-        """ Get input module in Chain """
+        """ Get input Layer of Chain """
         return self._layerChain.GetInput
 
     @property
     def Output(self):
-        """ Get last module in chain """
+        """ Get output Layer of Chain """
         return self._layerChain.GetOutput
 
     @property
@@ -99,17 +115,12 @@ class EffectsSystem:
         """ Return the inputShape of this System """
         return self._layerChain.GetOuput.GetOutputShape
 
-    def GetInputParams(self,inputSignal):
-        """ Detemrine qualities of input signal """
+    def SetSampleRate(self,x):
+        """ Set All Layers to new Sample Rate """
+        self._layerChain.SetSampleRate(x)
         return self
 
-    def SetInputParams(self,paramsList):
-        """ Set Parameters of each layer """
-        return self
-
-    def PrintSummary(self):
-        """ Print a summary of this module chain to Console """
-        return self
+    """ Magic Methods """
 
     def __str__(self):
         """ string-level representation of this instance """

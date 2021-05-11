@@ -235,7 +235,13 @@ class Plotting:
         if (xData.ndim == 1) and (yData.ndim == 1):
             plt.plot(xData,yData,color='blue',label=labels)
             plt.hlines(0,min(xData),max(xData),color='black')
-            plt.vlines(0,min(yData),max(xData),color='black')
+            plt.vlines(0,min(yData),max(yData),color='black')
+
+        # 1D and 2D arrays
+        elif (xData.ndim == 1) and (yData.ndim == 2):
+            plt.plot(xData,yData,label=labels)
+            plt.hlines(0,min(xData),max(xData),color='black')
+            plt.vlines(0,min(yData),max(yData),color='black')
 
         plt.grid()
         plt.legend()
@@ -279,5 +285,28 @@ class Plotting:
         --------------------------------
         Optionally save/show plot
         """
-        raise NotImplementedError()
+        
+        plt.figure(figsize=(16,12),facecolor='gray')
+        plt.title(title,size=40,weight='bold')
+        plt.xlabel("X - Axis",size=30,weight='bold')
+        plt.ylabel("Y - Axis",size=30,weight='bold')
+
+        if (len(labels) == yData.shape[0]):
+            plt.plot(xData,yData,labels=labels)
+            plt.legend()
+
+        else:
+            plt.plot(xData,yData.transpose())
+
+        plt.grid();
+        
+        if save :         
+            if type(save) == str:
+                plt.savefig(save + ".png")
+            else:
+                plt.savefig(title + ".png")
+        if show == True:
+            plt.show()
+
+        plt.close()
         return None

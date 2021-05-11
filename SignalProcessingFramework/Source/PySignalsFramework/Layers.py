@@ -16,13 +16,13 @@ import scipy.fftpack as fftpack
 
 import PySignalsFramework.AudioTools as AudioTools
 
-            #### LAYER DEFINITIONS ####
+            #### GENERAL LAYER DEFINITIONS ####
 
 class AbstractLayer :
     """
     AbstractLayer Type
         Abstract Base Type for all Layer Classes
-        Acts as node in double linked list
+        Acts as node in double linked list LayerChain
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -44,20 +44,32 @@ class AbstractLayer :
         self._type = "AbstractLayer"            # type of this layer instance
         self._sampleRate = sampleRate           # sample rate of this layer
         self._chainIndex = None                 # index in layer chain
+        self._next = None                       # temporarily set next
+        self._prev = None                       # temporarily set prev
         self.CoupleToNext(next)                 # connect to next Layer
-        self.CoupleToPrev(prev)                 # connect to Previous Layer
+        self.CoupleToPrev(prev)                 # connect to prev Layer
         self._shapeInput = inputShape           # input signal Shape
         self._shapeOutput = inputShape          # output signal shape
         self._initialized = False               # T/F is chain has been initialzed
         self._signal = np.array([])             # output Signal
-                             
-    # Methods
+
+    def DeepCopy(self):
+        """ Return Deep Copy of this Instance """
+        newLayer = AbstractLayer(self._name,self._sampleRate,
+                                 self._shapeInput,self._shapeOutput,
+                                 None,None)
+        newLayer.Next = self._next
+        newLayer.Prev = self._prev
+        return newLayer
+  
+    """ Public Interface """
 
     def Initialize (self,inputShape,**kwargs):
         """ Initialize this layer for usage in chain """
         self.SetInputShape(inputShape)
         self.SetOutputShape(inputShape)
         self._signal = np.empty(self._shapeOutput)
+        self._initialized = True
         return self
 
     def Call (self,X):
@@ -65,29 +77,13 @@ class AbstractLayer :
         if self._initialized == False:      # Not Initialized
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
             raise NotImplementedError(errMsg)       
-        if (X.shape == self._signal.shape):
-            self._signal = np.copy(X);
-            return self._signal
-        else:
-            return X
+        return X
 
     def Describe(self,detail=1):
         """ Desribe This layer in desired detail """
         print("-"*128)
         print("Name: {0} Type: {1}".format(self._name,type(self)))
-
-        print("-"*128)
         return None
-
-    @property
-    def Next(self):
-        """ Return the next Layer in chain """
-        return self._next
-
-    @property
-    def Prev(self):
-        """ Return the previous Layer in chain """
-        return self._prev
 
     def CoupleToNext(self,otherLayer):
         """ Couple to next Layer """
@@ -107,13 +103,25 @@ class AbstractLayer :
             self._prev = None
         return self
 
+    """ Getter & Setter Methods """
+
+    @property
+    def Name(self):
+        """ Get Name of this Layer """
+        return self._name
+
+    @property
+    def Type(self):
+        """ Get Type of this Layer """
+        return self._type
+
     @property
     def GetSampleRate(self):
-        """ Get the Sample Rate for this Layer """
+        """ Get Sample Rate for this Layer """
         return self._sampleRate
 
     def SetSampleRate(self,x):
-        """ Set the Samplke Rate for this Layer """
+        """ Set Sample Rate for this Layer """
         self._sampleRate = x
         return self
 
@@ -121,11 +129,21 @@ class AbstractLayer :
     def GetIndex(self):
         """ Get this Layer's chain index """
         return self._chainIndex
-    
+
     def SetIndex(self,x):
         """ Set this Layer's chain index """
         self._chainIndex = x
         return self
+
+    @property
+    def Next(self):
+        """ Get Next Layer in Chain """
+        return self._next
+
+    @property
+    def Prev(self):
+        """ Get Previous Layer in Chain """
+        return self._prev
 
     @property
     def GetInputShape(self):
@@ -148,11 +166,16 @@ class AbstractLayer :
         return self
 
     @property
+    def IsInitialized(self):
+        """ Get T/F is this Layer is Initialized """
+        return self._initialized
+
+    @property
     def GetSignal(self):
         """ Return the Output Signal of this Layer """
         return self._signal
 
-    # Magic Methods
+    """ Magic Methods """
 
     def __str__(self):
         """ string-level representation of this instance """
@@ -160,181 +183,19 @@ class AbstractLayer :
 
     def __repr__(self):
         """ Programmer-level representation of this instance """
-        return self._type + ": \'" + self._name + "\' @ " + str(self._chainIndex)
+        return self._type + ": \'" + self._name + "\' @ Idx " + str(self._chainIndex)
 
-class IdentityLayer (AbstractLayer):
-    """
-    IdentityLayer Type - Provides no Transformation of input
-        Serves as head/tail nodes of FX chain Graph
-    --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
-    --------------------------------
-    Return Instantiated identityLayer
-    """
-    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
-        """ Constructor for AbstractLayer Parent Class """
-        super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "IdentityLayer"
-
-class CustomCallable (AbstractLayer):
-    """
-    CustomCallable Type - Returns User defined transformation 
-    --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform    
-
-    _callable (callable) : User-denfined or desired function transformation
-    _callArgs (list) : List of arguments to pass to callable function
-    --------------------------------
-    """
-    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 callableFunction=None,callableArgs=[]):
-        """ Constructor for CustomCallable Class """
-        super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "CustomCallable"
-        if callableFunction:
-            self._callable = callableFunction
-        else:
-            raise ValueError("Must Provide callable argument for CustomCallable")
-        self._callArgs = callableArgs
-    
-    def Call(self,X):
-        """ Call this Layer with inputs X """
-        super().Call(X)
-        np.copyto(self.signal,self._callable(X,self._callArgs))
-        return self._signal
-
-class PlotSignal1D(AbstractLayer):
-    """
-    CustomCallable Type - Returns User defined transformation 
-    --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform   
-
-    _savePath (str) : Local path where plot of 1D signal is exported to
-    _figureName (str) : Name to save local plots
-    _showFigure (bool) : If True, figures is displayed to console
-    _saveFigure (bool) : If True, figures is saved to local drive
-    --------------------------------
+class AmplitudeEnvelope(AbstractLayer):
     """
 
-    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 figurePath=None,figureName=None,show=False,save=True):
-        """ Constructor for AbstractLayer Parent Class """
-        super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "PlotSignal1D"
-
-        if figurePath:
-            self._figurePath = figurePath           
-        else:
-            self._figurePath = os.getcwd()
-        if figureName:
-            self._figureName = figureName
-        else:
-            self._figureName = "Signal1D"
-        self._showFigure = show
-        self._saveFigure = save
-
-    def Call(self,X):
-        """ Call current layer with inputs X """
-        super().Call(X)
-        figureExportPath = os.path.join(self._figurePath,self._figureName)
-        cntr = 0
-        """while True:
-            if os.path.isfile(figureExportPath):
-                # the file already exists
-                figureExportPath += str(cntr)
-            else:
-                figureExportPath += str(cntr) """
-        xData = np.arange(X.shape) / self._sampleRate
-        AudioTools.Plotting.PlotGeneric(xData,X,save=figureExportPath,show=self._show)
-        return X
-    
-    @property
-    def GetShowStatus(self):
-        """ Get T/F if figure is shown to console """
-        return self._showFigure
-
-    def SetShowStatus(self,x):
-        """ Set T/F if figure is shown to console """
-        self._showFigure = x
-        return self
-    
-    @property
-    def GetSaveStatus(self):
-        """ Get T/F if Figure is saved to local Path """
-        return self._saveFigure
-
-    def SetSaveStatus(self,x):
-        """ Set T/F if figure is saved to local Path """
-        self._saveFigure = x
-        return self
-
-class IOLayer (AbstractLayer):
     """
-   IOLayer Type - 
-        Holds Input/Output Signals For Processing
-    --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
-    --------------------------------
-    Return instantiated AnalysisFrames Object 
-    """
+    pass
 
-    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
-        """ Constructor for AnalysisFames Instance """
-        super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "IOLayer"
-
-    # Methods
-
-    def Initialize (self,inputShape=None,**kwargs):
-        """ Initialize this layer for usage in chain """
-        super().Initialize(inputShape,**kwargs)
-        # Initialize input Layer?
-        return self
-
-    def Call (self,X):
-        """ Call this Layer with inputs X """
-        return super().Call(X)
-       
 class AnalysisFramesConstructor (AbstractLayer):
     """
     AnalysisFramesConstructor Type - 
-        Construct 2D array of analysis frames from 1D input waveform
+        Decompose a 1D time-domain signal into a 2D Signal of
+        Short-time analysis frames w/ optional head and tail padding
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -371,12 +232,13 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._padTail = tailPad
         self._padHead = headPad
         self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
+        self._shapeOutput = (self._maxFrames,self._frameSize)
         
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
         super().Initialize(inputShape,**kwargs)
 
-        # format output shape
+        # format output signal
         self._shapeOutput = (self._maxFrames,self._frameSize)
         self._signal = np.zeros(shape=self._shapeOutput,dtype=np.float32)
         self._framesInUse = 0
@@ -495,10 +357,9 @@ class AnalysisFramesDestructor (AbstractLayer):
         self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
         return self
 
-class ResampleLayer (AbstractLayer):
+class CustomCallable (AbstractLayer):
     """
-    Resample Layer -
-        Resample layer to 
+    CustomCallable Type - Returns User defined transformation 
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -509,81 +370,28 @@ class ResampleLayer (AbstractLayer):
     _shapeInput (tup) : Indicates shape (and rank) of layer input
     _shapeOutput (tup) : Indicates shape (and rank) of layer output
     _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
-    --------------------------------
-    Abstract class - Make no instance
-    """
-    def __init__(self,name,sampleRateNew,sampleRate=44100,inputShape=None,next=None,prev=None):
-        """ Constructor for ResampleLayer instance """
-        super().__init__(name,ssampleRate,inputShape,next,prev)
-        self._sampleRateNew = sampleRateNew
+    _signal (arr) : Signal from Transform    
 
-class WindowFunction (AbstractLayer):
-    """
-    WindowFunction Type - 
-         Apply a window finction
+    _callable (callable) : User-denfined or desired function transformation
+    _callArgs (list) : List of arguments to pass to callable function
     --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
-    
-    _nSamples (int) : Number of samples that the window is applied to
-    _padTail (int) : Number of zeros to tail pad the window with
-    _padHead (int) : Number of zeros to head pad the window with
-    _frameSize (int) : Size of each frame, includes samples + padding
-
-    _function (call/arr) : ???
-    _window (arr) : Array of window function and padding
-    --------------------------------
-    Return instantiated AnalysisFrames Object 
     """
-    
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 function=None,nSamples=1024,tailPad=1024,headPad=0):
-        """ Constructor for AnalysisFames Instance """
+                 callableFunction=None,callableArgs=[]):
+        """ Constructor for CustomCallable Class """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "WindowFunctionLayer"
-        
-        self._nSamples = nSamples
-        self._padTail = tailPad
-        self._padHead = headPad
-        self._frameSize = self._padHead + self._nSamples + self._padTail
-        
-        self._function = function;
-        self._window = np.zeros(shape=self._frameSize)
-        self._window[self._padHead:self._padTail] = self._function(self._nSamples)
-
-    def Initialize(self,inputShape=None,**kwargs):
-        """ Initialize Layer for Usage """
-        super().Initialize(inputShape,**kwargs)
-        self._isInit = True
-        return self
-
+        self._type = "CustomCallable"
+        if callableFunction:
+            self._callable = callableFunction
+        else:
+            raise ValueError("Must Provide callable argument for CustomCallable")
+        self._callArgs = callableArgs
+    
     def Call(self,X):
-        """ Call this module with inputs X """
-        X = super().Call(X)
-        np.multiply(X,self._window,out=X)
-        return X
-
-    def SetDeconstructionParams(self,params):
-        """ Return a List of params to deconstruct Frames into Signal """
-        self._samplesPerFrame = params[0]
-        self._padTail = params[4]
-        self._padHead = params[5]
-        return self
-
-class AmplitudeEnvelope(AbstractLayer):
-    """
-
-    """
-    pass
+        """ Call this Layer with inputs X """
+        super().Call(X)
+        np.copyto(self.signal,self._callable(X,self._callArgs))
+        return self._signal
 
 class DiscreteFourierTransform(AbstractLayer):
     """
@@ -624,10 +432,10 @@ class DiscreteFourierTransform(AbstractLayer):
         self.Transform(X)
         return self._signal
 
-class InvDiscreteFourierTransform(AbstractLayer):
+class DiscreteInvFourierTransform(AbstractLayer):
     """
-    InvDiscreteFourierTransform - 
-        Apply InverseDiscrete Fourier Transform to input signal
+    DiscreteInvFourierTransform - 
+        Apply Inverse Discrete Fourier Transform to input signal
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -709,3 +517,235 @@ class Equilizer(AbstractLayer) :
         super().Call(X)
 
         return X
+
+class IdentityLayer (AbstractLayer):
+    """
+    IdentityLayer Type - 
+        Provides no Transformation of input, serves as placeholder layer if needed       
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    Return Instantiated identityLayer
+    """
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for AbstractLayer Parent Class """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "IdentityLayer"
+
+class IOLayer (AbstractLayer):
+    """
+   IOLayer Type - 
+        Holds Input/Output Signals For Processing
+        Commonly used as Head/Tail nodes in LayerChain
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    Return instantiated AnalysisFrames Object 
+    """
+
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for AnalysisFames Instance """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "IOLayer"
+
+    # Methods
+
+    def Initialize (self,inputShape=None,**kwargs):
+        """ Initialize this layer for usage in chain """
+        super().Initialize(inputShape,**kwargs)
+        # Initialize input Layer?
+        return self
+
+    def Call (self,X):
+        """ Call this Layer with inputs X """
+        return super().Call(X)
+
+class LoggerLayer(AbstractLayer):
+    """
+
+    """
+    pass
+
+class PlotSignal(AbstractLayer):
+    """
+    PlotSignal -
+        Plot 1D or 2D signal in Time or Frequncy Space.
+        Optionally show figure to console and/or save to specified directory
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform   
+
+    _savePath (str) : Local path where plot of 1D signal is exported to
+    _figureName (str) : Name to save local plots
+    _showFigure (bool) : If True, figures is displayed to console
+    _saveFigure (bool) : If True, figures is saved to local drive
+    --------------------------------
+    """
+
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
+                 figurePath=None,figureName=None,show=False,save=True):
+        """ Constructor for AbstractLayer Parent Class """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "PlotSignal1D"
+
+        if figurePath:
+            self._figurePath = figurePath           
+        else:
+            self._figurePath = os.getcwd()
+        if figureName:
+            self._figureName = figureName
+        else:
+            self._figureName = "Signal1D"
+
+        self._showFigure = show
+        self._saveFigure = save
+
+    """ Public Interface """
+
+    def Call(self,X):
+        """ Call current layer with inputs X """
+        super().Call(X)
+        self._signal = X
+        figureExportPath = os.path.join(self._figurePath,self._figureName)
+        xData = np.arange(X.shape[-1]) / self._sampleRate
+
+        if (self._saveFigure == True):
+            AudioTools.Plotting.PlotGeneric(xData,self._signal,
+                                save=figureExportPath,show=self._showFigure)
+        else:
+            AudioTools.Plotting.PlotGeneric(xData,self._signal,
+                                save=False,show=self._showFigure)
+        return X
+    
+    """ Getter & Setter Methods """
+
+    @property
+    def GetShowStatus(self):
+        """ Get T/F if figure is shown to console """
+        return self._showFigure
+
+    def SetShowStatus(self,x):
+        """ Set T/F if figure is shown to console """
+        self._showFigure = x
+        return self
+    
+    @property
+    def GetSaveStatus(self):
+        """ Get T/F if Figure is saved to local Path """
+        return self._saveFigure
+
+    def SetSaveStatus(self,x):
+        """ Set T/F if figure is saved to local Path """
+        self._saveFigure = x
+        return self
+       
+class ResampleLayer (AbstractLayer):
+    """
+    Resample Layer -
+        Resample Signal to Desired Sample Rate
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    --------------------------------
+    Abstract class - Make no instance
+    """
+    def __init__(self,name,sampleRateNew,sampleRate=44100,inputShape=None,next=None,prev=None):
+        """ Constructor for ResampleLayer instance """
+        super().__init__(name,ssampleRate,inputShape,next,prev)
+        self._sampleRateNew = sampleRateNew
+
+class WindowFunction (AbstractLayer):
+    """
+    WindowFunction Type - 
+         Apply a specified Window function (or callable) to a
+         1D or 2D signal
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform  
+    
+    _nSamples (int) : Number of samples that the window is applied to
+    _padTail (int) : Number of zeros to tail pad the window with
+    _padHead (int) : Number of zeros to head pad the window with
+    _frameSize (int) : Size of each frame, includes samples + padding
+
+    _function (call/arr) : ???
+    _window (arr) : Array of window function and padding
+    --------------------------------
+    Return instantiated AnalysisFrames Object 
+    """
+    
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
+                 function=None,nSamples=1024,tailPad=1024,headPad=0):
+        """ Constructor for AnalysisFames Instance """
+        super().__init__(name,sampleRate,inputShape,next,prev)
+        self._type = "WindowFunctionLayer"
+        
+        self._nSamples = nSamples
+        self._padTail = tailPad
+        self._padHead = headPad
+        self._frameSize = self._padHead + self._nSamples + self._padTail
+        
+        self._function = function;
+        self._window = np.zeros(shape=self._frameSize)
+        self._window[self._padHead:self._padTail] = self._function(self._nSamples)
+
+    def Initialize(self,inputShape=None,**kwargs):
+        """ Initialize Layer for Usage """
+        super().Initialize(inputShape,**kwargs)
+        self._isInit = True
+        return self
+
+    def Call(self,X):
+        """ Call this module with inputs X """
+        X = super().Call(X)
+        np.multiply(X,self._window,out=X)
+        return X
+
+    def SetDeconstructionParams(self,params):
+        """ Return a List of params to deconstruct Frames into Signal """
+        self._samplesPerFrame = params[0]
+        self._padTail = params[4]
+        self._padHead = params[5]
+        return self
