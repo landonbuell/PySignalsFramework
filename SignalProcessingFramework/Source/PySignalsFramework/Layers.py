@@ -92,6 +92,7 @@ class AbstractLayer :
             otherLayer._prev = self
         else:
             self._next = None
+        self._initialized = False
         return self
 
     def CoupleToPrev(self,otherLayer):
@@ -101,6 +102,7 @@ class AbstractLayer :
             otherLayer._next = self
         else:
             self._prev = None
+        self._initialized = False
         return self
 
     """ Getter & Setter Methods """
@@ -153,6 +155,7 @@ class AbstractLayer :
     def SetInputShape(self,x):
         """ Set the input shape of this layer """
         self._shapeInput = x
+        self._initialized = False
         return self
 
     @property
@@ -163,6 +166,7 @@ class AbstractLayer :
     def SetOutputShape(self,x):
         """ Set the output shape of this layer """
         self._shapeOutput = x
+        self._initialized = False
         return self
 
     @property
@@ -234,6 +238,8 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
         self._shapeOutput = (self._maxFrames,self._frameSize)
         
+    """ Public Interface """
+
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
         super().Initialize(inputShape,**kwargs)
@@ -245,6 +251,15 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._initialized = True 
         return self
 
+    def Call(self, X):
+        """ Call this Module with inputs X """
+        X = super().Call(X)
+        self._framesInUse = 0
+        self.SignalToFrames(X)
+        return self._signal
+
+    """ Protected Interface """
+
     def SignalToFrames(self,X):
         """ Convert signal X into analysis Frames """
         frameStartIndex = 0
@@ -253,29 +268,58 @@ class AnalysisFramesConstructor (AbstractLayer):
             if (frame.shape == (self._samplesPerFrame,)):
                 # Frame has correct shape
                 self._signal[i , self._padHead:self._padTail] = frame
+                self._framesInUse += 1
             else:
                 # frame has incorrect shape
                 self._signal[i , self._padHead:self._padHead + frame.shape[0]] = frame
+                self._framesInUse += 1
                 break
             frameStartIndex += self._overlapSamples
-            self._framesInUse += 1
         return self
 
-    def Call(self, X):
-        """ Call this Module with inputs X """
-        X = super().Call(X)
-        self._framesInUse = 0
-        self.SignalToFrames(X)
-        return self._signal
+    def FramesToSignal(self,X):
+        """ Convert Analysis Frames X into 1D signal """
+        frameStartIndex = 0
+        for i in range(self._framesInUse):
+            frame = X[i,self._padHead:self._padHead + self._samplesPerFrame]
+            self._signal[frameStartIndex : frameStartIndex + self._samplesPerFrame] = frame
+            frameStartIndex += self._sample_samplesPerFrame
+        return self
+
+    """ Getter & Setter Methods """
 
     @property
-    def GetDeconstructionParams(self):
-        """ Return a List of params to deconstruct Frames into Signal """
-        params = [self._samplesPerFrame,self._percentOverlap,self._maxFrames,self._framesInUse,
-                  self._padTail,self._padHead]
+    def GetFrameParams(self):
+        """ Get Frame Construction Parameters """
+        params = [  self._samplesPerFrame,  self._percentOverlap,   self._maxFrames,
+                    self._framesInUse,      self._padTail,          self._padHead]
         return params
 
-class AnalysisFramesDestructor (AbstractLayer):
+    def SetFrameParams(self,x):
+        """ Set Frame Construction Parameters """
+        self._samplesPerFrame   = x[0]
+        self._percentOverlap    = x[1]
+        self._maxFrames         = x[2]
+        self._framesInUse       = x[3]
+        self._padTail           = x[4]
+        self._padHead           = x[5]
+        self._overlapSamples = int(x[0] * (1 - x[1] ))
+        self._initialized = False
+        return self
+
+    @property
+    def GetMaxFrames(self):
+        """ Get Maximum number of analysis frames """
+        return self._maxFrames
+
+    def SetMaxFrames(self,x):
+        """ Set the Maximimber of analysis frames """
+        self._maxFrames = x
+        self.Initialize(self._shapeInput)
+        return self
+
+
+class AnalysisFramesDestructor (AnalysisFramesConstructor):
     """
     AnalysisFramesDestructor Layer Type - 
         Destruct 2D array of analysis frames into 1D input waveform
@@ -306,7 +350,9 @@ class AnalysisFramesDestructor (AbstractLayer):
                  samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,tailPad=1024,headPad=0,
                  deconstructParams=None):
         """ Constructor for AnalysisFamesDestructor Instance """
-        super().__init__(name,sampleRate,inputShape,next,prev)
+        #super().__init__(name,sampleRate,inputShape,next,prev)
+        super().__init__(name,sampleRate,inputShape,next,prev,
+                         samplesPerFrame,percentOverlap,maxFrames,tailPad,headPad)
         self._type = "AnalysisFrameConstructor"
         if deconstructParams:           # Parameters from AnalysisFramesConstructor
             self.SetDeconstructionParams(deconstructParams)
@@ -320,6 +366,8 @@ class AnalysisFramesDestructor (AbstractLayer):
             self._framesInUse = 0
         self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
 
+    """ Public Interface """
+
     def Initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
         super().Initialize(inputShape,**kwargs)
@@ -331,31 +379,18 @@ class AnalysisFramesDestructor (AbstractLayer):
         self._initialized = True 
         return self
 
-    def FramesToSignal(self,X):
-        """ Convert signal X into analysis Frames """
-        frameStartIndex = 0
-        for i in range(self._framesInUse):
-            frame = X[i,self._padHead:self._padHead + self._samplesPerFrame]
-            self._signal[frameStartIndex : frameStartIndex + self._samplesPerFrame] = frame
-            frameStartIndex += self._sample_samplesPerFrame
-        return self
-
     def Call(self, X):
         """ Call this Module with inputs X """
         X = super().Call(X)
         self.FramesToSignal(X)
         return self._signal
 
-    def SetDeconstructionParams(self,params):
-        """ Return a List of params to deconstruct Frames into Signal """
-        self._samplesPerFrame = params[0]
-        self._percentOverlap = params[1]
-        self._maxFrames = params[2]
-        self._frameInUse = params[3]
-        self._padTail = params[4]
-        self._padHead = params[5]
-        self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
-        return self
+    """ Protected Interface """
+
+    
+
+    
+
 
 class CustomCallable (AbstractLayer):
     """
