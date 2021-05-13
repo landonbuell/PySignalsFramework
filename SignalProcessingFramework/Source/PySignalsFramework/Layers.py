@@ -267,7 +267,7 @@ class AnalysisFramesConstructor (AbstractLayer):
             frame = X[frameStartIndex:frameStartIndex+self._samplesPerFrame]
             if (frame.shape == (self._samplesPerFrame,)):
                 # Frame has correct shape
-                self._signal[i , self._padHead:self._padTail] = frame
+                self._signal[i , self._padHead:-self._padTail] = frame
                 self._framesInUse += 1
             else:
                 # frame has incorrect shape
@@ -443,16 +443,32 @@ class DiscreteFourierTransform(AbstractLayer):
     _shapeOutput (tup) : Indicates shape (and rank) of layer output
     _initialized (bool) : Indicates if Layer has been initialized    
     _signal (arr) : Signal from Transform  
+
+    _freqAxis (arr) : Frequency Space Axis values
     --------------------------------
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
         """ Constructor for NBandEquilizer Instance """
-        super().__init__(name,sampleRate,inputShape,next,prev)
+        super().__init__(name,sampleRate,inputShape,next,prev)   
+        self._freqAxis = np.array([])
+
+    """ Public Interface """
 
     def Initialize(self,inputShape=None,**kwargs):
         """ Initialize Current Layer """
-        super().Initialize(self,inputShape,**kwargs)
+        super().Initialize(inputShape,**kwargs)     
+        self._signal = self._signal.astype('complex64')
+        sampleSpacing = 1 / self._sampleRate
+        self._freqAxis = fftpack.fftfreq(self._shapeOutput[-1],sampleSpacing)
         return self
+
+    def Call(self,X):
+        """ Call this Layer w/ Inputs X """
+        super().Call(X)
+        self.Transform(X)
+        return self._signal
+
+    """ Protected Interface """
 
     def Transform(self,X):
         """ Execute Discrete Fourier Transform on Signal X """
@@ -461,11 +477,17 @@ class DiscreteFourierTransform(AbstractLayer):
         np.copyto(self._signal,X)
         return self
 
-    def Call(self,X):
-        """ Call this Layer w/ Inputs X """
-        super().Call(X)
-        self.Transform(X)
-        return self._signal
+    """ Getter and Setter Methods """
+
+    @property
+    def GetFreqAxis(self):
+        """ Get the X-Axis Data """
+        return self._freqAxis
+
+    def SetFreqAxis(self,x):
+        """ Set the X-Axis Data """
+        self._freqAxis = x
+        return self
 
 class DiscreteInvFourierTransform(AbstractLayer):
     """
@@ -640,11 +662,12 @@ class PlotSignal(AbstractLayer):
     _figureName (str) : Name to save local plots
     _showFigure (bool) : If True, figures is displayed to console
     _saveFigure (bool) : If True, figures is saved to local drive
+    self._xAxis (arr) : Data to use for x Axis
     --------------------------------
     """
 
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
-                 figurePath=None,figureName=None,show=False,save=True):
+                 figurePath=None,figureName=None,show=False,save=True,xAxis=None):
         """ Constructor for AbstractLayer Parent Class """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "PlotSignal1D"
@@ -656,26 +679,36 @@ class PlotSignal(AbstractLayer):
         if figureName:
             self._figureName = figureName
         else:
-            self._figureName = "Signal1D"
+            self._figureName = self._name + "SignalPlot"
 
         self._showFigure = show
         self._saveFigure = save
 
+        if xAxis:
+            self._xAxis = xAxis
+        else:
+            self._xAxis = np.array([])
+
     """ Public Interface """
+
+    def Initialize(self, inputShape, **kwargs):
+        """ Initialize this Layer for Usage """
+        super().Initialize(inputShape, **kwargs)
+        if kwargs['xAxis']:
+            self._xAxis = kwargs['xAxis']
+        else:
+            self._xAxis = np.arange(self._shapeInput[-1]) / self._sampleRate
+        return self
 
     def Call(self,X):
         """ Call current layer with inputs X """
         super().Call(X)
         self._signal = X
         figureExportPath = os.path.join(self._figurePath,self._figureName)
-        xData = np.arange(X.shape[-1]) / self._sampleRate
 
-        if (self._saveFigure == True):
-            AudioTools.Plotting.PlotGeneric(xData,self._signal,
-                                save=figureExportPath,show=self._showFigure)
-        else:
-            AudioTools.Plotting.PlotGeneric(xData,self._signal,
-                                save=False,show=self._showFigure)
+        AudioTools.Plotting.PlotGeneric(self._xAxis,self._signal,
+                            save=self._saveFigure,show=self._showFigure)
+
         return X
     
     """ Getter & Setter Methods """
@@ -699,6 +732,62 @@ class PlotSignal(AbstractLayer):
         """ Set T/F if figure is saved to local Path """
         self._saveFigure = x
         return self
+
+    @property
+    def GetxAxisData(self):
+        """ Get the X-Axis Data """
+        return self._xAxis
+
+    def SetxAxisData(self,x):
+        """ Set the X-Axis Data """
+        self._xAxis = x
+        return self
+
+class PlotSpectrogram (PlotSignal):
+    """
+    PlotSpectrogram -
+        Plot 2D spectrogram as color-coded heat map in Time and Frequncy Space.
+        Optionally show figure to console and/or save to specified directory
+    --------------------------------
+    _name (str) : Name for user-level identification
+    _type (str) : Type of Layer Instance
+    _sampleRate (int) : Number of samples per second  
+    _chainIndex (int) : Location where Layer sits in chain 
+    _next (AbstractParentLayer) : Next layer in the layer chain
+    _prev (AbstractParentLayer) : Prev layer in the layer chain  
+    _shapeInput (tup) : Indicates shape (and rank) of layer input
+    _shapeOutput (tup) : Indicates shape (and rank) of layer output
+    _initialized (bool) : Indicates if Layer has been initialized    
+    _signal (arr) : Signal from Transform   
+
+    _savePath (str) : Local path where plot of 1D signal is exported to
+    _figureName (str) : Name to save local plots
+    _showFigure (bool) : If True, figure is displayed to console
+    _saveFigure (bool) : If True, figure is saved to local drive
+    _axisTime (arr) : Array of Values for time axis
+    _axisFreq (arr) : Array of Values for frequency ax
+    _logScale (bool) : If True, values are plotted on log scale
+    _colorMap (str) : String indicating color map to use
+
+    --------------------------------
+    """
+    def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
+                 timeAxis=np.array([]),freqAxis=np.array([]),logScale=True,colorMap='viridis',
+                 figurePath=None,figureName=None,show=False,save=True):
+        """ Constructor for PlotSpectrogram Instance """
+        super().__init__(name,sampleRate,inputShape,next,prev,
+                         figurePath,figureName,show,save,None)
+        self._axisTime = timeAxis
+        self._axisFreq = freqAxis
+        self._logScale = logScale
+        self._colorMap = colorMap
+        
+    """ Public Interface """
+
+    def Initialize(self, inputShape, **kwargs):
+        """ Initialize This Layer """
+        super().Initialize(inputShape, **kwargs)
+
        
 class ResampleLayer (AbstractLayer):
     """
@@ -764,7 +853,7 @@ class WindowFunction (AbstractLayer):
         
         self._function = function;
         self._window = np.zeros(shape=self._frameSize)
-        self._window[self._padHead:self._padTail] = self._function(self._nSamples)
+        self._window[self._padHead:-self._padTail] = self._function(self._nSamples)
 
     def Initialize(self,inputShape=None,**kwargs):
         """ Initialize Layer for Usage """
