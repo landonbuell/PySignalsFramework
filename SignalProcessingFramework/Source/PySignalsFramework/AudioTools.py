@@ -10,7 +10,8 @@ Toy Audio Samples
 import numpy as np
 import matplotlib.pyplot as plt
 import scipy.signal as scisig
-import scipy.io as scio
+import scipy.io.wavfile
+
 
                 #### CLASS DEFINITIONS ####
 
@@ -159,12 +160,12 @@ class AudioIO :
     @staticmethod
     def ReadWAV(localPath,channels="all"):
         """ Read wav Audio file and return sample rate and audio data """
-        rate,data = scio.wavfile.read(localPath)
-        if channels.upper() in ["All","BOTH","LR"]:
+        rate,data = scipy.io.wavfile.read(localPath)
+        if channels.capitalize() in ["All","BOTH","LR"]:
             return rate,data.transpose()
-        elif channels.upper() in ["LEFT","L"]:
+        elif channels.capitalize() in ["LEFT","L"]:
             return rate,data.transpose()[0]
-        elif channels.upper() in ["Right","R"]:
+        elif channels.capitalize() in ["Right","R"]:
             return rate,data.transpose()[1]
         else:
             raise ValueError("Channels keyword must be in [left,right,all]")
@@ -177,7 +178,13 @@ class AudioIO :
     @staticmethod
     def WriteWAV(localPath,signal,sampleRate):
         """ Write wav Audio file to local path """
-        raise NotImplementedError()
+        try:
+            signal = signal.astype('byte')
+            scipy.io.wavfile.write(localPath,sampleRate,signal)
+            return True
+        except Exception as expt:
+            print(expt)
+            return False
 
     @staticmethod
     def WriteTXT(localPath,signal):

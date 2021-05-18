@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3152e0f2-264a-4e46-acac-663ac9058d41</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>SimulatorMain.py</StartupFile>
+    <StartupFile>AudioReadTest.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -22,10 +22,16 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AudioReadTest.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="PySignalsFramework\AudioTools.py" />
     <Compile Include="PySignalsFramework\EffectsSystem.py" />
     <Compile Include="PySignalsFramework\LayerChain.py" />
-    <Compile Include="PySignalsFramework\Layers.py" />
+    <Compile Include="PySignalsFramework\LayersStandard.py" />
+    <Compile Include="PySignalsFramework\LayersCustom.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="SimulatorMain.py" />
     <Compile Include="PySignalsFramework\__init__.py" />
   </ItemGroup>
