@@ -179,7 +179,7 @@ class AudioIO :
     def WriteWAV(localPath,signal,sampleRate):
         """ Write wav Audio file to local path """
         try:
-            signal = signal.astype('byte')
+            signal = signal.astype('int32')
             scipy.io.wavfile.write(localPath,sampleRate,signal)
             return True
         except Exception as expt:
@@ -247,8 +247,8 @@ class Plotting:
         # 1D and 2D arrays
         elif (xData.ndim == 1) and (yData.ndim == 2):
             plt.plot(xData,yData,label=labels)
-            plt.hlines(0,min(xData),max(xData),color='black')
-            plt.vlines(0,min(yData),max(yData),color='black')
+            plt.hlines(0,np.min(xData),np.max(xData),color='black')
+            plt.vlines(0,np.min(yData),np.max(yData),color='black')
 
         plt.grid()
         plt.legend()

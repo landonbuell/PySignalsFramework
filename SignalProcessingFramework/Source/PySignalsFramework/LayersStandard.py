@@ -355,7 +355,7 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
                          samplesPerFrame,percentOverlap,maxFrames,tailPad,headPad)
         self._type = "AnalysisFrameConstructor"
         if deconstructParams:           # Parameters from AnalysisFramesConstructor
-            self.SetDeconstructionParams(deconstructParams)
+            self.SetFrameParams(deconstructParams)
         else:
             self._samplesPerFrame = samplesPerFrame
             self._percentOverlap = percentOverlap
@@ -386,11 +386,6 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
         return self._signal
 
     """ Protected Interface """
-
-    
-
-    
-
 
 class CustomCallable (AbstractLayer):
     """
@@ -641,7 +636,7 @@ class LoggerLayer(AbstractLayer):
     """
     pass
 
-class NormalizeLayer(AbstractLayer):
+class ScaleAmplitudeLayer(AbstractLayer):
     """
     PlotSignal -
         Plot 1D or 2D signal in Time or Frequncy Space.
@@ -658,7 +653,8 @@ class NormalizeLayer(AbstractLayer):
     _initialized (bool) : Indicates if Layer has been initialized    
     _signal (arr) : Signal from Transform   
 
-    _const (float) : scaling factor (
+    _const (float) : Min/Max of signal will be this value
+    _scaleFactor (float) : Value Required to scale amplitude to desire values
     --------------------------------
     """
     def __init__(self, name, sampleRate=44100, inputShape=None, next=None, prev=None,
@@ -666,13 +662,15 @@ class NormalizeLayer(AbstractLayer):
         """ Initialize NormalizeLayer class Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._const = const
-        self._normFactor = 0
+        self._scaleFactor = 0
 
     """ Public Interface """
 
     def Initialize(self, inputShape, **kwargs):
         """ Initialize This Layer """
         super().Initialize(inputShape, **kwargs)
+        
+        self._initialized = True
         return self
 
     def Call(self,X):
@@ -688,11 +686,11 @@ class NormalizeLayer(AbstractLayer):
         maxAmp = np.max(signal)
         minAmp = np.min(signal)
         if (maxAmp > np.abs(minAmp)):
-            signal = signal * (const / maxAmp)
-            return signal
+            self._scaleFactor  = (const / maxAmp)
         else:
-            signal = signal * (-const / minAmp)
-            return signal
+            self._scaleFactor = (-const / minAmp)
+        signal = signal * self._scaleFactor
+        return signal
 
     """ Getter & Setter Methods """
 
@@ -846,6 +844,7 @@ class PlotSpectrogram (PlotSignal):
         self._axisFreq = freqAxis
         self._logScale = logScale
         self._colorMap = colorMap
+        raise NotImplementedType()
         
     """ Public Interface """
 
@@ -876,6 +875,7 @@ class ResampleLayer (AbstractLayer):
         """ Constructor for ResampleLayer instance """
         super().__init__(name,ssampleRate,inputShape,next,prev)
         self._sampleRateNew = sampleRateNew
+        raise NotImplementedType()
 
 class WindowFunction (AbstractLayer):
     """
