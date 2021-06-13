@@ -14,7 +14,6 @@ import numpy as np
 import scipy.signal as signal
 import scipy.fftpack as fftpack
 
-#import PySignalsFramework.AudioTools as AudioTools
 import AudioTools
 
             #### STANDARD LAYER DEFINITIONS ####

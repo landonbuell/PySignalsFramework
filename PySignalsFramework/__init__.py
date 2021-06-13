@@ -3,6 +3,14 @@ PySignalsFramework
 __init__ 
 """
 
+import AudioTools
+import LayersCustom
+import LayersStandard
+import LayerChain
+import EffectsSystem
+
+__version__ = "0.0.0"
+
 def setmodule(module):
     """
     Decorator for overriding __module__ on a function or class.

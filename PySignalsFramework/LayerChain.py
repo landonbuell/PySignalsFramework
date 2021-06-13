@@ -7,9 +7,6 @@ LayerChain
 
             #### IMPORTS ####
 
-#import PySignalsFramework.LayersStandard as Layers
-#import PySignalsFramework.LayersCustom as Custom
-
 import LayersStandard as Layers
 import LayersCustom as Custom
 

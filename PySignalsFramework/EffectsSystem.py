@@ -7,7 +7,6 @@ FXSetup
 
         #### IMPORTS ####
 
-#import PySignalsFramework.LayerChain as LayerChain
 import LayerChain
 
         #### CLASS DEFINITIONS ####
