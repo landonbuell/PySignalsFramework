@@ -1,8 +1,8 @@
 """
+PySignalsFramework
+LayersStandard.py
 Landon Buell
-EffectsSimulator
-LayersStandard
-5 Feb 2020
+5 Feb 2021
 """
 
             #### IMPORTS ####

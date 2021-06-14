@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AdminTools.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="AudioTools.py" />
     <Compile Include="EffectsSystem.py" />
     <Compile Include="LayerChain.py" />

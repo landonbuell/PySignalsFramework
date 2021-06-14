@@ -1,8 +1,8 @@
 """
+PySignalsFramework
+EffectsSystems.py
 Landon Buell
-EffectsEmmulatorPython
-FXSetup
-7 Feb 2020
+7 Feb 2021
 """
 
         #### IMPORTS ####

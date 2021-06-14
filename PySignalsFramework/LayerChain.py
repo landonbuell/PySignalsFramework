@@ -1,8 +1,8 @@
 """
+PySignalsFramework
+LayerChain.py
 Landon Buell
-EffectsSimulator
-LayerChain
-5 Feb 2020
+5 Feb 2021
 """
 
             #### IMPORTS ####
