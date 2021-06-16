@@ -4,9 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>351e7155-ee16-4a5d-ac5f-115aab8847df</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>PySignalsTutorials.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <StartupFile>Tutorial00.py</StartupFile>
+    <SearchPath>..\..\PySignalsFramework</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>PySignalsTutorials</Name>
@@ -21,7 +20,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="PySignalsTutorials.py" />
+    <Compile Include="Tutorial00.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

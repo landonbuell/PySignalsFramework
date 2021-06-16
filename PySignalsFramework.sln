@@ -3,7 +3,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.31205.134
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PySignalsFramework", "PySignalsFramework.pyproj", "{AECC1B89-3127-4E1C-80CC-57795A8A2657}"
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PySignalsFramework", "PySignalsFramework\PySignalsFramework.pyproj", "{AECC1B89-3127-4E1C-80CC-57795A8A2657}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "PySignalsTutorials", "PySignalsTutorials\PySignalsTutorials.pyproj", "{351E7155-EE16-4A5D-AC5F-115AAB8847DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{5430BDEE-BAF6-431F-945D-CE752460123F}"
+	ProjectSection(SolutionItems) = preProject
+		LICENSE.txt = LICENSE.txt
+		pyproject.toml.txt = pyproject.toml.txt
+		README.md = README.md
+		setup.py = setup.py
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +23,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{AECC1B89-3127-4E1C-80CC-57795A8A2657}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{AECC1B89-3127-4E1C-80CC-57795A8A2657}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{351E7155-EE16-4A5D-AC5F-115AAB8847DF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{351E7155-EE16-4A5D-AC5F-115AAB8847DF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
