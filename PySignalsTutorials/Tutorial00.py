@@ -14,4 +14,5 @@ import PySignalsFramework as pySig
 
 if __name__ == "__main__":
 
-    # Create a PySignals "EffectsSystem"
+
+    pass

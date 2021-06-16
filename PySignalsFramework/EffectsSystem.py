@@ -11,7 +11,7 @@ import LayerChain
 
         #### CLASS DEFINITIONS ####
 
-class EffectsSystem:
+class LinearSystem:
     """ 
     EffectsSystem Type -
         Parent container for all classes in this package
@@ -91,11 +91,6 @@ class EffectsSystem:
         return self._layerChain.GetChainlist()
 
     @property
-    def ChainSize(self):
-        """ Return the number of elements in the chain list """
-        return len(self._layerChain)
-
-    @property
     def Input(self):
         """ Get input Layer of Chain """
         return self._layerChain.GetInput
@@ -129,3 +124,10 @@ class EffectsSystem:
     def __repr__(self):
         """ Programmer-level representation of this instance """
         return self._type + ": \'" + self._name + "\' w/ " + str(self.ChainSize) + " node(s)"
+
+    def __len__(self):
+        """ Return Number of layers in the module """
+        return self._nLayers
+
+    def __iter__(self):
+        """ Iterator Through the Effect System Layers """

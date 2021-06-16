@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>351e7155-ee16-4a5d-ac5f-115aab8847df</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Tutorial00.py</StartupFile>
+    <StartupFile>Tutorial01.py</StartupFile>
     <SearchPath>..\..\PySignalsFramework</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
@@ -21,6 +21,9 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Tutorial00.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Tutorial01.py">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>

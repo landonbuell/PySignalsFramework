@@ -75,7 +75,7 @@ class AbstractLayer :
     def Call (self,X):
         """ Call this Layer with inputs X """
         if self._initialized == False:      # Not Initialized
-            errMsg = self.__str__() + " has not been initialized\n\t" + "Call <Layer>.Initialize() before use"
+            errMsg = self.__str__() + " has not been initialized\n\t" + "Call <instance>.Initialize() before use"
             raise NotImplementedError(errMsg)       
         return X
 
