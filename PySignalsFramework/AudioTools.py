@@ -122,33 +122,37 @@ class SimpleWavesGenerator:
     Static Class of methods to Generate Simple Waveforms
     """
 
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'SimpleWavesGenerator' is a static class - cannot make instance")
+
     @staticmethod
-    def CosineWave(amp,freq,time,phase):
-        """ Create Cosine wave given class attributes """
+    def CosineWave(time,amp=1,freq=1,phase=0):
+        """ Create Cosine wave given amplitude, linear frequency, time axis, and phase shift """
         signal = amp*np.cos(2*np.pi*freq*time + phase)
         return signal
 
     @staticmethod
-    def SineWave(amp,freq,time,phase):
-        """ Create Sine wave given class attributes """
+    def SineWave(time,amp=1,freq=1,phase=0):
+        """ Create Sine wave given amplitude, linear frequency, time axis, and phase shift """
         signal = amp*np.sin(2*np.pi*freq*time + phase)
         return signal
 
     @staticmethod
-    def SquareWave(amp,freq,time,phase):
-        """ Create Square wave given class attributes """
+    def SquareWave(time,amp=1,freq=1,phase=0):
+        """ Create Square wave given amplitude, linear frequency, time axis, and phase shift """
         signal = amp*scisig.square(2*np.pi*freq*time + phase)
         return signal
 
     @staticmethod
-    def SawtoothWave(amp,freq,time,phase):
-        """ Create Sawtooth wave given class attributes """
+    def SawtoothWave(time,amp=1,freq=1,phase=0):
+        """ Create Sawtooth wave given amplitude, linear frequency, time axis, and phase shift """
         signal = amp*scisig.sawtooth(2*np.pi*freq*time + phase)
         return signal
 
     @staticmethod
-    def TriangleWave(amp,freq,time,phase):
-        """ Create Triangle wave given class attributes """
+    def TriangleWave(time,amp=1,freq=1,phase=0):
+        """ Create Triangle wave given amplitude, linear frequency, time axis, and phase shift """
         signal = scisig.sawtooth(2*np.pi*freq*time + phase,width=0.5)
         return signal
 
@@ -156,6 +160,10 @@ class AudioIO :
     """
     Static Class of methods to Input/Output
     """
+
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'AudioIO' is a static class - cannot make instance")
 
     @staticmethod
     def ReadWAV(localPath,channels="all"):
@@ -197,6 +205,10 @@ class WindowFunctions :
     static class of window functions
     """
 
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'Plotting' is a static class - cannot make instance")
+
     @staticmethod
     def WindowFunctions(functionName,nSamples):
         """ Get A window function from string identifying it """
@@ -213,11 +225,24 @@ class WindowFunctions :
         """ Get Hanning Window that is nSamples Long """
         return scisig.windows.gaussian(nSamples)
 
+class AudioSamples:
+    """
+
+    """
+
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'Plotting' is a static class - cannot make instance")
+
 
 class Plotting:
     """
     Class of Static methods to provide matplotlib visualizations of data
     """
+
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'Plotting' is a static class - cannot make instance")
 
     @staticmethod
     def PlotTimeSeries(xData,yData,labels=[],title="",save=False,show=True):
@@ -298,14 +323,20 @@ class Plotting:
         plt.xlabel("X - Axis",size=30,weight='bold')
         plt.ylabel("Y - Axis",size=30,weight='bold')
 
-        if (len(labels) == yData.shape[0]):
-            plt.plot(xData,yData,labels=labels)
-            plt.legend()
+        # Each are 1D arrays
+        if (xData.ndim == 1) and (yData.ndim == 1):
+            plt.plot(xData,yData,color='blue',label=labels)
+            plt.hlines(0,min(xData),max(xData),color='black')
+            plt.vlines(0,min(yData),max(yData),color='black')
 
-        else:
-            plt.plot(xData,yData.transpose())
+        # 1D and 2D arrays
+        elif (xData.ndim == 1) and (yData.ndim == 2):
+            plt.plot(xData,yData,label=labels)
+            plt.hlines(0,np.min(xData),np.max(xData),color='black')
+            plt.vlines(0,np.min(yData),np.max(yData),color='black')
 
-        plt.grid();
+        plt.grid()
+        plt.legend()
         
         if save :         
             if type(save) == str:

@@ -7,8 +7,8 @@ Landon Buell
 
             #### IMPORTS ####
 
-import LayersStandard as Layers
-import LayersCustom as Custom
+import PySignalsFramework.LayersStandard as Layers
+import PySignalsFramework.LayersCustom as Custom
 
             #### CLASS DEFINITIONS ####
 

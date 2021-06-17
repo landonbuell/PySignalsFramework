@@ -14,7 +14,7 @@ import numpy as np
 import scipy.signal as signal
 import scipy.fftpack as fftpack
 
-import AudioTools
+import PySignalsFramework.AudioTools as AudioTools
 
             #### STANDARD LAYER DEFINITIONS ####
 
@@ -107,17 +107,14 @@ class AbstractLayer :
 
     """ Getter & Setter Methods """
 
-    @property
     def GetName(self):
         """ Get Name of this Layer """
         return self._name
 
-    @property
     def GetType(self):
         """ Get Type of this Layer """
         return self._type
 
-    @property
     def GetSampleRate(self):
         """ Get Sample Rate for this Layer """
         return self._sampleRate
@@ -127,7 +124,6 @@ class AbstractLayer :
         self._sampleRate = x
         return self
 
-    @property
     def GetIndex(self):
         """ Get this Layer's chain index """
         return self._chainIndex
@@ -137,17 +133,14 @@ class AbstractLayer :
         self._chainIndex = x
         return self
 
-    @property
     def Next(self):
         """ Get Next Layer in Chain """
         return self._next
 
-    @property
     def Prev(self):
         """ Get Previous Layer in Chain """
         return self._prev
 
-    @property
     def GetInputShape(self):
         """ Get the input shape of this layer """
         return self._shapeInput
@@ -158,7 +151,6 @@ class AbstractLayer :
         self._initialized = False
         return self
 
-    @property
     def GetOutputShape(self):
         """ Get The output shape of this layer """
         return self._shapeOutput
@@ -169,12 +161,10 @@ class AbstractLayer :
         self._initialized = False
         return self
 
-    @property
     def IsInitialized(self):
         """ Get T/F is this Layer is Initialized """
         return self._initialized
 
-    @property
     def GetSignal(self):
         """ Return the Output Signal of this Layer """
         return self._signal
@@ -288,7 +278,6 @@ class AnalysisFramesConstructor (AbstractLayer):
 
     """ Getter & Setter Methods """
 
-    @property
     def GetFrameParams(self):
         """ Get Frame Construction Parameters """
         params = [  self._samplesPerFrame,  self._percentOverlap,   self._maxFrames,
@@ -307,7 +296,6 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._initialized = False
         return self
 
-    @property
     def GetMaxFrames(self):
         """ Get Maximum number of analysis frames """
         return self._maxFrames
@@ -408,7 +396,7 @@ class CustomCallable (AbstractLayer):
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
                  callableFunction=None,callableArgs=[]):
-        """ Constructor for CustomCallable Class """
+        """ Constructor for CustomCallable Layer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
         self._type = "CustomCallable"
         if callableFunction:
@@ -443,7 +431,7 @@ class DiscreteFourierTransform(AbstractLayer):
     --------------------------------
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
-        """ Constructor for NBandEquilizer Instance """
+        """ Constructor for DiscreteFourierTransform Layer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)   
         self._freqAxis = np.array([])
 
@@ -474,7 +462,6 @@ class DiscreteFourierTransform(AbstractLayer):
 
     """ Getter and Setter Methods """
 
-    @property
     def GetFreqAxis(self):
         """ Get the X-Axis Data """
         return self._freqAxis
@@ -502,7 +489,7 @@ class DiscreteInvFourierTransform(AbstractLayer):
     --------------------------------
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None):
-        """ Constructor for NBandEquilizer Instance """
+        """ Constructor for DiscreteInvFourierTransform Layer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
 
     def Initialize(self,inputShape=None,**kwargs):
@@ -747,7 +734,7 @@ class PlotSignal(AbstractLayer):
         self._showFigure = show
         self._saveFigure = save
 
-        if xAxis:
+        if xAxis is not None:
             self._xAxis = xAxis
         else:
             self._xAxis = np.array([])
@@ -769,14 +756,19 @@ class PlotSignal(AbstractLayer):
         self._signal = X
         figureExportPath = os.path.join(self._figurePath,self._figureName)
 
-        AudioTools.Plotting.PlotGeneric(self._xAxis,self._signal,
+        if (self._signal.dtype == np.complex64):
+            data = np.array([self._signal.real,self._signal.imag],dtype=np.float32).transpose()
+            AudioTools.Plotting.PlotGeneric(self._xAxis,data,labels=['real','imaginary'],
                             save=self._saveFigure,show=self._showFigure)
 
-        return X
+        else:
+            AudioTools.Plotting.PlotGeneric(self._xAxis,self._signal,labels=['signal'],
+                            save=self._saveFigure,show=self._showFigure)
+
+        return self._signal
     
     """ Getter & Setter Methods """
 
-    @property
     def GetShowStatus(self):
         """ Get T/F if figure is shown to console """
         return self._showFigure
@@ -785,8 +777,7 @@ class PlotSignal(AbstractLayer):
         """ Set T/F if figure is shown to console """
         self._showFigure = x
         return self
-    
-    @property
+
     def GetSaveStatus(self):
         """ Get T/F if Figure is saved to local Path """
         return self._saveFigure
@@ -796,7 +787,6 @@ class PlotSignal(AbstractLayer):
         self._saveFigure = x
         return self
 
-    @property
     def GetxAxisData(self):
         """ Get the X-Axis Data """
         return self._xAxis

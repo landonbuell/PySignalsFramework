@@ -7,7 +7,7 @@ Landon Buell
 
         #### IMPORTS ####
 
-import LayerChain
+import PySignalsFramework.LayerChain as LayerChain
 
         #### CLASS DEFINITIONS ####
 
