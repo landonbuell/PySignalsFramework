@@ -46,14 +46,18 @@ class AbstractLayer :
         self._chainIndex = None                 # index in layer chain
         self._next = None                       # temporarily set next
         self._prev = None                       # temporarily set prev
-        self.CoupleToNext(next)                 # connect to next Layer
-        self.CoupleToPrev(prev)                 # connect to prev Layer
+        self.coupleToNext(next)                 # connect to next Layer
+        self.coupleToPrev(prev)                 # connect to prev Layer
         self._shapeInput = inputShape           # input signal Shape
         self._shapeOutput = inputShape          # output signal shape
-        self._initialized = False               # T/F is chain has been initialzed
+        self._init = False               # T/F is chain has been initialzed
         self._signal = np.array([])             # output Signal
 
-    def DeepCopy(self):
+    def __del__(self):
+        """ Destructor for AbstractLayer Parent Class """
+        pass
+
+    def deepCopy(self):
         """ Return Deep Copy of this Instance """
         newLayer = AbstractLayer(self._name,self._sampleRate,
                                  self._shapeInput,self._shapeOutput,
@@ -64,108 +68,113 @@ class AbstractLayer :
   
     """ Public Interface """
 
-    def Initialize (self,inputShape,**kwargs):
+    def initialize (self,inputShape,**kwargs):
         """ Initialize this layer for usage in chain """
-        self.SetInputShape(inputShape)
-        self.SetOutputShape(inputShape)
+        self.setInputShape(inputShape)
+        self.setOutputShape(inputShape)
         self._signal = np.empty(self._shapeOutput)
-        self._initialized = True
+        self._init = True
         return self
 
-    def Call (self,X):
+    def call (self,X):
         """ Call this Layer with inputs X """
-        if self._initialized == False:      # Not Initialized
+        if self._init == False:      # Not Initialized
             errMsg = self.__str__() + " has not been initialized\n\t" + "Call <instance>.Initialize() before use"
             raise NotImplementedError(errMsg)       
         return X
 
-    def Describe(self,detail=1):
+    def describe(self,detail=1):
         """ Desribe This layer in desired detail """
         print("-"*128)
         print("Name: {0} Type: {1}".format(self._name,type(self)))
         return None
 
-    def CoupleToNext(self,otherLayer):
+    def coupleToNext(self,otherLayer):
         """ Couple to next Layer """
         if otherLayer:
             self._next = otherLayer
             otherLayer._prev = self
         else:
             self._next = None
-        self._initialized = False
+        self._init = False
         return self
 
-    def CoupleToPrev(self,otherLayer):
+    def coupleToPrev(self,otherLayer):
         """ Couple to Previous Layer """
         if otherLayer:
             self._prev = otherLayer
             otherLayer._next = self
         else:
             self._prev = None
-        self._initialized = False
+        self._init = False
         return self
 
     """ Getter & Setter Methods """
 
-    def GetName(self):
+    def getName(self):
         """ Get Name of this Layer """
         return self._name
 
-    def GetType(self):
+    def getType(self):
         """ Get Type of this Layer """
         return self._type
 
-    def GetSampleRate(self):
+    def getSampleRate(self):
         """ Get Sample Rate for this Layer """
         return self._sampleRate
 
-    def SetSampleRate(self,x):
+    def setSampleRate(self,x):
         """ Set Sample Rate for this Layer """
         self._sampleRate = x
         return self
 
-    def GetIndex(self):
+    def getIndex(self):
         """ Get this Layer's chain index """
         return self._chainIndex
 
-    def SetIndex(self,x):
+    def setIndex(self,x):
         """ Set this Layer's chain index """
         self._chainIndex = x
         return self
 
-    def Next(self):
+    def next(self):
         """ Get Next Layer in Chain """
         return self._next
 
-    def Prev(self):
+    def prev(self):
         """ Get Previous Layer in Chain """
         return self._prev
 
-    def GetInputShape(self):
+    def getInputShape(self):
         """ Get the input shape of this layer """
         return self._shapeInput
 
-    def SetInputShape(self,x):
+    def setInputShape(self,x):
         """ Set the input shape of this layer """
         self._shapeInput = x
-        self._initialized = False
+        self._init = False
         return self
 
-    def GetOutputShape(self):
+    def getOutputShape(self):
         """ Get The output shape of this layer """
         return self._shapeOutput
 
-    def SetOutputShape(self,x):
+    def setOutputShape(self,x):
         """ Set the output shape of this layer """
         self._shapeOutput = x
-        self._initialized = False
+        self._init = False
         return self
 
-    def IsInitialized(self):
+    def getInit(self):
         """ Get T/F is this Layer is Initialized """
-        return self._initialized
+        return self._init
 
-    def GetSignal(self):
+    def setInit(self,x):
+        """ Set T/F if this Layer is Initialized """
+        self._init = x
+        return self
+
+    def getSignal(self):
         """ Return the Output Signal of this Layer """
         return self._signal
 
@@ -227,12 +236,16 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._padHead = headPad
         self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
         self._shapeOutput = (self._maxFrames,self._frameSize)
+
+    def __del__(self):
+        """ Destructor for AnalysisFamesConstructor Instance """
+        pass
         
     """ Public Interface """
 
-    def Initialize (self,inputShape=None,**kwargs):
+    def initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
-        super().Initialize(inputShape,**kwargs)
+        super().initialize(inputShape,**kwargs)
 
         # format output signal
         self._shapeOutput = (self._maxFrames,self._frameSize)
@@ -241,16 +254,16 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._initialized = True 
         return self
 
-    def Call(self, X):
+    def call(self, X):
         """ Call this Module with inputs X """
-        X = super().Call(X)
+        X = super().call(X)
         self._framesInUse = 0
-        self.SignalToFrames(X)
+        self.signalToFrames(X)
         return self._signal
 
     """ Protected Interface """
 
-    def SignalToFrames(self,X):
+    def signalToFrames(self,X):
         """ Convert signal X into analysis Frames """
         frameStartIndex = 0
         for i in range(self._maxFrames):
@@ -267,7 +280,7 @@ class AnalysisFramesConstructor (AbstractLayer):
             frameStartIndex += self._overlapSamples
         return self
 
-    def FramesToSignal(self,X):
+    def framesToSignal(self,X):
         """ Convert Analysis Frames X into 1D signal """
         frameStartIndex = 0
         for i in range(self._framesInUse):
@@ -278,13 +291,13 @@ class AnalysisFramesConstructor (AbstractLayer):
 
     """ Getter & Setter Methods """
 
-    def GetFrameParams(self):
+    def getFrameParams(self):
         """ Get Frame Construction Parameters """
         params = [  self._samplesPerFrame,  self._percentOverlap,   self._maxFrames,
                     self._framesInUse,      self._padTail,          self._padHead]
         return params
 
-    def SetFrameParams(self,x):
+    def setFrameParams(self,x):
         """ Set Frame Construction Parameters """
         self._samplesPerFrame   = x[0]
         self._percentOverlap    = x[1]
@@ -296,14 +309,14 @@ class AnalysisFramesConstructor (AbstractLayer):
         self._initialized = False
         return self
 
-    def GetMaxFrames(self):
+    def getMaxFrames(self):
         """ Get Maximum number of analysis frames """
         return self._maxFrames
 
-    def SetMaxFrames(self,x):
+    def setMaxFrames(self,x):
         """ Set the Maximimber of analysis frames """
         self._maxFrames = x
-        self.Initialize(self._shapeInput)
+        self.initialize(self._shapeInput)
         return self
 
 
@@ -343,7 +356,7 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
                          samplesPerFrame,percentOverlap,maxFrames,tailPad,headPad)
         self._type = "AnalysisFrameConstructor"
         if deconstructParams:           # Parameters from AnalysisFramesConstructor
-            self.SetFrameParams(deconstructParams)
+            self.setFrameParams(deconstructParams)
         else:
             self._samplesPerFrame = samplesPerFrame
             self._percentOverlap = percentOverlap
@@ -356,9 +369,9 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
 
     """ Public Interface """
 
-    def Initialize (self,inputShape=None,**kwargs):
+    def initialize (self,inputShape=None,**kwargs):
         """ Initialize this module for usage in chain """
-        super().Initialize(inputShape,**kwargs)
+        super().initialize(inputShape,**kwargs)
 
         # format output shape
         self._shapeOutput = (self._sample_samplesPerFrame * self._framesInUse,)
@@ -367,10 +380,10 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
         self._initialized = True 
         return self
 
-    def Call(self, X):
+    def call(self, X):
         """ Call this Module with inputs X """
-        X = super().Call(X)
-        self.FramesToSignal(X)
+        X = super().call(X)
+        self.framesToSignal(X)
         return self._signal
 
     """ Protected Interface """
@@ -405,9 +418,9 @@ class CustomCallable (AbstractLayer):
             raise ValueError("Must Provide callable argument for CustomCallable")
         self._callArgs = callableArgs
     
-    def Call(self,X):
+    def call(self,X):
         """ Call this Layer with inputs X """
-        super().Call(X)
+        super().call(X)
         np.copyto(self.signal,self._callable(X,self._callArgs))
         return self._signal
 
@@ -437,23 +450,23 @@ class DiscreteFourierTransform(AbstractLayer):
 
     """ Public Interface """
 
-    def Initialize(self,inputShape=None,**kwargs):
-        """ Initialize Current Layer """
-        super().Initialize(inputShape,**kwargs)     
+    def initialize(self,inputShape=None,**kwargs):
+        """ initialize Current Layer """
+        super().initialize(inputShape,**kwargs)     
         self._signal = self._signal.astype('complex64')
         sampleSpacing = 1 / self._sampleRate
         self._freqAxis = fftpack.fftfreq(self._shapeOutput[-1],sampleSpacing)
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this Layer w/ Inputs X """
-        super().Call(X)
-        self.Transform(X)
+        super().call(X)
+        self.transform(X)
         return self._signal
 
     """ Protected Interface """
 
-    def Transform(self,X):
+    def transform(self,X):
         """ Execute Discrete Fourier Transform on Signal X """
         nSamples = X.shape[-1]
         X = fftpack.fft(X,n=nSamples,axis=-1,overwrite_x=True)
@@ -462,11 +475,11 @@ class DiscreteFourierTransform(AbstractLayer):
 
     """ Getter and Setter Methods """
 
-    def GetFreqAxis(self):
+    def getFreqAxis(self):
         """ Get the X-Axis Data """
         return self._freqAxis
 
-    def SetFreqAxis(self,x):
+    def setFreqAxis(self,x):
         """ Set the X-Axis Data """
         self._freqAxis = x
         return self
@@ -492,22 +505,22 @@ class DiscreteInvFourierTransform(AbstractLayer):
         """ Constructor for DiscreteInvFourierTransform Layer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
 
-    def Initialize(self,inputShape=None,**kwargs):
+    def initialize(self,inputShape=None,**kwargs):
         """ Initialize Current Layer """
-        super().Initialize(self,inputShape,**kwargs)
+        super().initialize(self,inputShape,**kwargs)
         return self
 
-    def Transform(self,X):
+    def transform(self,X):
         """ Execute Discrete Fourier Transform on Signal X """
         nSamples = X.shape[-1]
         X = fftpack.ifft(X,n=nSamples,axis=-1,overwrite_x=True)
         np.copyto(self._signal,X)
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this Layer w/ Inputs X """
-        super().Call(X)
-        self.Transform(X)
+        super().call(X)
+        self.transform(X)
         return self._signal
 
 class Equilizer(AbstractLayer) :
@@ -540,20 +553,20 @@ class Equilizer(AbstractLayer) :
         self._bands = bands
         self._nBands = len(bands)
 
-        self._frequencyResponse = self.BuildResponse()
+        self._frequencyResponse = self.buildResponse()
 
 
-    def BuildResponse(self):
+    def buildResponse(self):
         """ Build this module's frequency response curve """
         return self
 
-    def ApplyResponse(self,X):
+    def applyResponse(self,X):
         """ Apply Frequency response curve to the signal """
         return X
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this Module with inputs X """
-        super().Call(X)
+        super().call(X)
 
         return X
 
@@ -607,15 +620,15 @@ class IOLayer (AbstractLayer):
 
     # Methods
 
-    def Initialize (self,inputShape=None,**kwargs):
+    def initialize (self,inputShape=None,**kwargs):
         """ Initialize this layer for usage in chain """
-        super().Initialize(inputShape,**kwargs)
+        super().initialize(inputShape,**kwargs)
         # Initialize input Layer?
         return self
 
-    def Call (self,X):
+    def call (self,X):
         """ Call this Layer with inputs X """
-        return super().Call(X)
+        return super().call(X)
 
 class LoggerLayer(AbstractLayer):
     """
@@ -653,22 +666,22 @@ class ScaleAmplitudeLayer(AbstractLayer):
 
     """ Public Interface """
 
-    def Initialize(self, inputShape, **kwargs):
+    def initialize(self, inputShape, **kwargs):
         """ Initialize This Layer """
-        super().Initialize(inputShape, **kwargs)
+        super().initialize(inputShape, **kwargs)
         
         self._initialized = True
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this Layer with Inputs X """
-        super().Call(X)
-        self._signal = self.NormalizeSignal(X,self._const)
+        super().call(X)
+        self._signal = self.normalizeSignal(X,self._const)
         return self._signal
 
     """ Protected Interface """
 
-    def NormalizeSignal(signal,const=1):
+    def normalizeSignal(signal,const=1):
         """ Normalize Signal to have max/min amplitde of +/- const """
         maxAmp = np.max(signal)
         minAmp = np.min(signal)
@@ -681,12 +694,11 @@ class ScaleAmplitudeLayer(AbstractLayer):
 
     """ Getter & Setter Methods """
 
-    @property
-    def GetNormFactor(self):
+    def getNormFactor(self):
         """ Get Current Normalization Factor """
         return self._normFact
     
-    def SetNormFactor(self,x):
+    def setNormFactor(self,x):
         """ Set Normalization Factor """
         self._normFactor = x
         return self
@@ -741,18 +753,18 @@ class PlotSignal(AbstractLayer):
 
     """ Public Interface """
 
-    def Initialize(self, inputShape, **kwargs):
-        """ Initialize this Layer for Usage """
-        super().Initialize(inputShape, **kwargs)
+    def initialize(self, inputShape, **kwargs):
+        """ initialize this Layer for Usage """
+        super().initialize(inputShape, **kwargs)
         if 'xAxis' in kwargs:
             self._xAxis = kwargs['xAxis']
         else:
             self._xAxis = np.arange(self._shapeInput[-1]) / self._sampleRate
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call current layer with inputs X """
-        super().Call(X)
+        super().call(X)
         self._signal = X
         figureExportPath = os.path.join(self._figurePath,self._figureName)
 
@@ -769,29 +781,29 @@ class PlotSignal(AbstractLayer):
     
     """ Getter & Setter Methods """
 
-    def GetShowStatus(self):
+    def getShowStatus(self):
         """ Get T/F if figure is shown to console """
         return self._showFigure
 
-    def SetShowStatus(self,x):
+    def setShowStatus(self,x):
         """ Set T/F if figure is shown to console """
         self._showFigure = x
         return self
 
-    def GetSaveStatus(self):
+    def getSaveStatus(self):
         """ Get T/F if Figure is saved to local Path """
         return self._saveFigure
 
-    def SetSaveStatus(self,x):
+    def setSaveStatus(self,x):
         """ Set T/F if figure is saved to local Path """
         self._saveFigure = x
         return self
 
-    def GetxAxisData(self):
+    def getXAxisData(self):
         """ Get the X-Axis Data """
         return self._xAxis
 
-    def SetxAxisData(self,x):
+    def setXAxisData(self,x):
         """ Set the X-Axis Data """
         self._xAxis = x
         return self
@@ -838,9 +850,9 @@ class PlotSpectrogram (PlotSignal):
         
     """ Public Interface """
 
-    def Initialize(self, inputShape, **kwargs):
+    def initialize(self, inputShape, **kwargs):
         """ Initialize This Layer """
-        super().Initialize(inputShape, **kwargs)
+        super().initialize(inputShape, **kwargs)
 
        
 class ResampleLayer (AbstractLayer):
@@ -910,19 +922,19 @@ class WindowFunction (AbstractLayer):
         self._window = np.zeros(shape=self._frameSize)
         self._window[self._padHead:-self._padTail] = self._function(self._nSamples)
 
-    def Initialize(self,inputShape=None,**kwargs):
+    def initialize(self,inputShape=None,**kwargs):
         """ Initialize Layer for Usage """
-        super().Initialize(inputShape,**kwargs)
+        super().initialize(inputShape,**kwargs)
         self._isInit = True
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this module with inputs X """
-        X = super().Call(X)
+        X = super().call(X)
         np.multiply(X,self._window,out=X)
         return X
 
-    def SetDeconstructionParams(self,params):
+    def setDeconstructionParams(self,params):
         """ Return a List of params to deconstruct Frames into Signal """
         self._samplesPerFrame = params[0]
         self._padTail = params[4]
