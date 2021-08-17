@@ -32,7 +32,7 @@ if __name__ == "__main__":
     
     """ 
     To Analyze the signals in frequency space, we apply a Discrete-Fourier-Transform (DFT)
-    To eaxh signal to find the frequency components.
+    To each signal to find the frequency components.
     Let's make an Instance of the 'DiscreteFourierTransformLayer' from the 'LayersStandard' namespace
     We give the layer a name, sample rate, input shape, and 'initialize' it for usage
     """
@@ -42,8 +42,8 @@ if __name__ == "__main__":
     layerDFT.initialize(inputShape=(nSamples,))
 
     """ 
-    We apply the DFT by passing it through the layer instance with the 'Call' Method
-    We get the output of the layer by using the 'GetSignal()' method
+    We apply the DFT by passing it through the layer instance with the 'call' Method
+    We get the output of the layer by using the 'getSignal()' method
     """
 
     layerDFT.Call(signalA)
