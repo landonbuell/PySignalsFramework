@@ -77,9 +77,9 @@ class AbstractLayer :
         return self
 
     def call (self,X):
-        """ Call this Layer with inputs X """
+        """ call this Layer with inputs X """
         if self._init == False:      # Not Initialized
-            errMsg = self.__str__() + " has not been initialized\n\t" + "Call <instance>.Initialize() before use"
+            errMsg = self.__str__() + " has not been initialized\n\t" + "call <instance>.Initialize() before use"
             raise NotImplementedError(errMsg)       
         return X
 
@@ -255,7 +255,7 @@ class AnalysisFramesConstructor (AbstractLayer):
         return self
 
     def call(self, X):
-        """ Call this Module with inputs X """
+        """ call this Module with inputs X """
         X = super().call(X)
         self._framesInUse = 0
         self.signalToFrames(X)
@@ -381,16 +381,16 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
         return self
 
     def call(self, X):
-        """ Call this Module with inputs X """
+        """ call this Module with inputs X """
         X = super().call(X)
         self.framesToSignal(X)
         return self._signal
 
     """ Protected Interface """
 
-class CustomCallable (AbstractLayer):
+class Customcallable (AbstractLayer):
     """
-    CustomCallable Type - Returns User defined transformation 
+    Customcallable Type - Returns User defined transformation 
     --------------------------------
     _name (str) : Name for user-level identification
     _type (str) : Type of Layer Instance
@@ -409,17 +409,17 @@ class CustomCallable (AbstractLayer):
     """
     def __init__(self,name,sampleRate=44100,inputShape=None,next=None,prev=None,
                  callableFunction=None,callableArgs=[]):
-        """ Constructor for CustomCallable Layer Instance """
+        """ Constructor for Customcallable Layer Instance """
         super().__init__(name,sampleRate,inputShape,next,prev)
-        self._type = "CustomCallable"
+        self._type = "Customcallable"
         if callableFunction:
             self._callable = callableFunction
         else:
-            raise ValueError("Must Provide callable argument for CustomCallable")
+            raise ValueError("Must Provide callable argument for Customcallable")
         self._callArgs = callableArgs
     
     def call(self,X):
-        """ Call this Layer with inputs X """
+        """ call this Layer with inputs X """
         super().call(X)
         np.copyto(self.signal,self._callable(X,self._callArgs))
         return self._signal
@@ -459,7 +459,7 @@ class DiscreteFourierTransform(AbstractLayer):
         return self
 
     def call(self,X):
-        """ Call this Layer w/ Inputs X """
+        """ call this Layer w/ Inputs X """
         super().call(X)
         self.transform(X)
         return self._signal

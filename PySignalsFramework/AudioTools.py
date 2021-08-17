@@ -33,11 +33,11 @@ class WavesGenerator :
         self._time = time
         self._freq = np.array(linearFrequencies).ravel()
         self._nVals = self._freq.shape[-1]
-        self._amps = self.SetLocalValues(amplitudes)
-        self._phas = self.SetLocalValues(phases) * 0
+        self._amps = self.setWaveformParams(amplitudes)
+        self._phas = self.setWaveformParams(phases) * 0
         self._sampleRate = sampleRate
         
-    def SetLocalValues (self,value):
+    def setWaveformParams (self,value):
         """ Set Local value terms based on data type """
         if value:
             if type(values) == int:
@@ -52,7 +52,7 @@ class WavesGenerator :
             values = np.ones(shape=self._nVals,dtype=np.float32)
         return values
 
-    def TestLocalValues(self):
+    def validateWaveformParams(self):
         """ test if all params have correct shape """
         self._nVals = self._freq.shape[-1]
         if (self._amps.shape[-1] != self._nVals) or (self._phas.shape[-1] != self._nVals):
@@ -62,58 +62,55 @@ class WavesGenerator :
         else:
             return True
     
-    def CosineWave(self):
+    def getCosineWave(self):
         """ Create Cosine wave given class attributes """
-        self.TestLocalValues()
+        self.validateWaveformParams()
         signal = np.zeros(shape=self._time.shape[-1])
         for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A*np.cos(2*np.pi*f*self._time + p)
         return signal
 
-    def SineWave(self):
+    def getSineWave(self):
         """ Create Sine wave given class attributes """
-        self.TestLocalValues()
+        self.validateWaveformParams()
         signal = np.zeros(shape=self._time.shape[-1])
         for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A*np.sin(2*np.pi*f*self._time + p)
         return signal
 
-    def SquareWave(self):
+    def getSquareWave(self):
         """ Create Square wave given class attributes """
-        self.TestLocalValues()
+        self.validateWaveformParams()
         signal = np.zeros(shape=self._time.shape[-1])
         for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.square(2*np.pi*f*self._time + p)
         return signal
 
-    def SawtoothWave(self):
+    def getSawtoothWave(self):
         """ Create Sawtooth wave given class attributes """
-        self.TestLocalValues()
+        self.validateWaveformParams()
         signal = np.zeros(shape=self._time.shape[-1])
         for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.sawtooth(2*np.pi*f*self._time + p)
         return signal
 
-    def TriangleWave(self):
+    def getTriangleWave(self):
         """ Create Triangle wave given class attributes """
-        self.TestLocalValues()
+        self.validateWaveformParams()
         signal = np.zeros(shape=self._time.shape[-1])
         for A,f,p in zip(self._amps,self._freq,self._phas):
             signal += A * scisig.sawtooth(2*np.pi*f*self._time + p,width=0.5)
         return signal
 
-    @property
-    def GetAmplitudes(self):
+    def getAmplitudes(self):
         """ Get Amplitude values """
         return self._amps
 
-    @property
-    def GetFrequencies(self):
+    def getFrequencies(self):
         """ Get Linear Frequency values """
         return self._freq
 
-    @property
-    def GetPhases(self):
+    def getPhases(self):
         """ Get Phase Shift values """
         return self._phas
 
@@ -166,7 +163,7 @@ class AudioIO :
         raise TypeError("Type 'AudioIO' is a static class - cannot make instance")
 
     @staticmethod
-    def ReadWAV(localPath,channels="all"):
+    def readWAV(localPath,channels="all"):
         """ Read wav Audio file and return sample rate and audio data """
         rate,data = scipy.io.wavfile.read(localPath)
         if channels.capitalize() in ["All","BOTH","LR"]:
@@ -179,12 +176,12 @@ class AudioIO :
             raise ValueError("Channels keyword must be in [left,right,all]")
 
     @staticmethod
-    def ReadTXT(localPath,cols,sampleRate=44100):
+    def readTXT(localPath,cols,sampleRate=44100):
         """ Read txt Audio file and return sampl rate and audio data """
         raise NotImplementedError()
 
     @staticmethod
-    def WriteWAV(localPath,signal,sampleRate):
+    def writeWAV(localPath,signal,sampleRate):
         """ Write wav Audio file to local path """
         try:
             signal = signal.astype('int32')
@@ -195,7 +192,7 @@ class AudioIO :
             return False
 
     @staticmethod
-    def WriteTXT(localPath,signal):
+    def writeTXT(localPath,signal):
         """ Write txt Audio file to local path """
         raise NotImplementedError()
 
@@ -210,18 +207,18 @@ class WindowFunctions :
         raise TypeError("Type 'Plotting' is a static class - cannot make instance")
 
     @staticmethod
-    def WindowFunctions(functionName,nSamples):
+    def windowFunctions(functionName,nSamples):
         """ Get A window function from string identifying it """
         windows = {"blackman":scisig.windows.blackman,}
         raise NotImplementedError()
 
     @staticmethod
-    def HanningWindow(nSamples):
+    def hanningWindow(nSamples):
         """ Get Hanning Window that is nSamples Long """
         return scisig.windows.hann(nSamples)
 
     @staticmethod
-    def GaussianWindow(nSamples):
+    def gaussianWindow(nSamples):
         """ Get Hanning Window that is nSamples Long """
         return scisig.windows.gaussian(nSamples)
 
@@ -245,7 +242,7 @@ class Plotting:
         raise TypeError("Type 'Plotting' is a static class - cannot make instance")
 
     @staticmethod
-    def PlotTimeSeries(xData,yData,labels=[],title="",save=False,show=True):
+    def plotTimeSeries(xData,yData,labels=[],title="",save=False,show=True):
         """
         Plot Time-series information in Matplotlib figure
         --------------------------------
@@ -288,7 +285,7 @@ class Plotting:
         
 
     @staticmethod
-    def PlotFrequencySeries(xData,yData,labels=[],title="",save=False,show=True):
+    def plotFrequencySeries(xData,yData,labels=[],title="",save=False,show=True):
         """
         Plot Time-series information in Matplotlib figure
         --------------------------------
@@ -304,7 +301,7 @@ class Plotting:
         return None
 
     @staticmethod
-    def PlotGeneric(xData,yData,labels=[],title="",save=False,show=True):
+    def plotGeneric(xData,yData,labels=[],title="",save=False,show=True):
         """
         Plot Time-series information in Matplotlib figure
         --------------------------------

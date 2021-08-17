@@ -38,9 +38,9 @@ class LayerChainLinear :
         if existingLayers:
             # If given a list of layers
             if type(existingLayers) == list:   
-                self.AssembleFromList(existingLayers)
+                self.constructFromList(existingLayers)
             elif type(existingLayers) == Layers.AbstractLayer:
-                self.AssembleFromNode(existingLayers)
+                self.constructFromNode(existingLayers)
             else:
                 errMsg = "Existing layer must be of type List or AbstractParentLayer, but got {0}".format(type(existingLayers))
                 raise TypeError(errMsg)
@@ -50,13 +50,13 @@ class LayerChainLinear :
 
     """ Private Methods """
 
-    def AssembleFromList(self,layerList):
+    def constructFromList(self,layerList):
         """ Assemble a layer chain from list of unconnected layers """
         for layer in layerList:
-            self.Append(layer)
+            self.append(layer)
         return self
 
-    def AssembleFromNode(self,layerNode):
+    def constructFromNode(self,layerNode):
         """ Assmble a layer chain from single node to end """
         currentLayer = layerNode        
         self.HeadNode.CoupleToNext(layerNode)
@@ -67,15 +67,15 @@ class LayerChainLinear :
 
     """ Public Interface """
 
-    def Append (self,newLayer):
+    def append (self,newLayer):
         """ Append a new Layer to the tail of this Chain """
         if (self._size == 0):
             self._head._next = newLayer
             self._tail._prev = newLayer
-            newLayer._prev = self.GetHead
-            newLayer._next = self.GetTail
+            newLayer._prev = self.getHead
+            newLayer._next = self.getTail
         else:
-            oldTail = self.GetOutput
+            oldTail = self.getOutput
             oldTail._next = newLayer
             newLayer._prev = oldTail
             newLayer._next = self._tail
@@ -83,15 +83,15 @@ class LayerChainLinear :
         self._size += 1
         return self
 
-    def Prepend(self,newLayer):
+    def prepend(self,newLayer):
         """ Prepend a new Layer to the head of this chain """
         if (self._size == 0):
             self._head._next = newLayer
             self._tail._prev = newLayer
-            newLayer.Prev = self.GetHead
-            newLayer.Next = self.GetTail
+            newLayer.Prev = self.getHead
+            newLayer.Next = self.getTail
         else:
-            oldHead = self.GetInput
+            oldHead = self.getInput
             oldHead._prev = newLayer
             newLayer._next = oldHead
             newLayer._prev = self._head
@@ -99,38 +99,38 @@ class LayerChainLinear :
         self._size += 1
         return self
 
-    def PopFromTail(self):
+    def popFromTail(self):
         """ Remove + Return the last layer before the tail """
-        if len(self.GetChainList) == 0:
+        if len(self.getChainList) == 0:
             raise IndexError("No elements currently in layer chain")
         else:
-            oldOutput = self.GetOutput
+            oldOutput = self.getOutput
             newOutput = oldOutput.Prev
-            self.GetTail.SetPrev(newOutput)
-            newOutput.SetNext(self.GetTail)
+            self.getTail.SetPrev(newOutput)
+            newOutput.SetNext(self.getTail)
             self._size -= 1
         return oldOutput
 
-    def PopFromHead(self):
+    def popFromHead(self):
         """ Remove + Return the first layer after the head """
-        if len(self.GetChainList) == 0:
+        if len(self.getChainList) == 0:
             raise IndexError("No elements currently in layer chain")
         else:
-            oldInput = self.GetInput
+            oldInput = self.getInput
             newInput = oldInput.Next
-            self.GetHead.SetNext(newInput)
-            newInput.SetPrev(self.GetHead)
+            self.getHead.SetNext(newInput)
+            newInput.SetPrev(self.getHead)
             self._size -= 1
         return oldInput
 
-    def Initialize(self,inputShape):
+    def initialize(self,inputShape):
         """ Initialize layer Chain For Usage """
         if (self._size == 0):   # nothing to init
             return self         
 
         currentIdx = 0
-        currentLayer = self.GetInput
-        while(currentLayer != self.GetTail):    # visit each node in the chain
+        currentLayer = self.getInput
+        while(currentLayer != self.getTail):    # visit each node in the chain
             currentLayer.SetIndex(currentIdx)   # set layer index
             currentLayer.Initialize(inputShape) # init with input Shape
 
@@ -138,62 +138,58 @@ class LayerChainLinear :
             currentLayer = currentLayer.Next            # Layer Layer in the chain
             currentIdx += 1                     # inc index
         # Set Index for Head + Tail Nodes
-        self.GetHead.SetIndex(-1)
-        self.GetTail.SetIndex(-1)
+        self.getHead.SetIndex(-1)
+        self.getTail.SetIndex(-1)
         return self
         
-    def Call(self,X):
+    def call(self,X):
         """ Call layer Chain w/ inputs X """
-        currentLayer = self.GetInput
-        while (currentLayer != self.GetTail):
+        currentLayer = self.getInput
+        while (currentLayer != self.getTail):
             X = currentLayer.Call(X)
             currentLayer = currentLayer.Next
         return X
 
-    def CopyChain(self,newName):
+    def copyChain(self,newName):
         """ Return a Non-aliased copy of this FX Chain """
-        return LayerChainLinear(newName,self.GetChainList())
+        return LayerChainLinear(newName,self.getChainList())
 
     """ Getter & Setter Methods """
 
-    @property
-    def GetInput (self):
+    def getInput (self):
         """ Return Input of Layer Chain """
         if self._size == 0:
             return self._head
         else:
             return self._head._next
 
-    @property
-    def GetOutput(self):
+    def getOutput(self):
         """ Return Output of Layer Chain """
         if self._size == 0:
             return self._tail
         else:
             return self._tail._prev
 
-    @property
-    def GetHead(self):
+    def getHead(self):
         """ Return head Layer of Chain """
         return self._head
 
-    @property
-    def GetTail(self):
+    def getTail(self):
         """ Return tail Layer of Chain """
         return self._tail
 
-    def GetChainList(self):
+    def getChainList(self):
         """ Return the Lienar Chain Layers as a List """
         chainList = []
-        currentLayer = self.GetInput
+        currentLayer = self.getInput
         while (currentLayer != self._tail):
             chainList.append(currentLayer)
             currentLayer = currentLayer._next
         return chainList
 
-    def SetSampleRate(self,x):
+    def setSampleRate(self,x):
         """ Set All Layers to have same sample rate """
-        currentLayer = self.GetHead
+        currentLayer = self.getHead
         while(currentLayer != None):
             if (type(currentLayer != ResampleLayer)):
                 currentLayer.SetSampleRate(x)
@@ -205,10 +201,11 @@ class LayerChainLinear :
 
     def __iter__(self):
         """ Iterate through this Layer chain """
-        currentLayer = self.GetInput
+        currentLayer = self.getInput
         while (currentLayer != self._tail):
             yield ccurrentLayer
             currentLayer = currentLayer._next
+        return self._tail
 
     def __len__(self):
         """ Get Length of this Layer chain """

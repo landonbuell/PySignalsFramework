@@ -39,7 +39,7 @@ if __name__ == "__main__":
 
     sampleRate = 1024
     layerDFT = Layers.DiscreteFourierTransform("DFT_Layer",sampleRate=sampleRate,inputShape=(nSamples,))
-    layerDFT.Initialize(inputShape=(nSamples,))
+    layerDFT.initialize(inputShape=(nSamples,))
 
     """ 
     We apply the DFT by passing it through the layer instance with the 'Call' Method
@@ -47,12 +47,12 @@ if __name__ == "__main__":
     """
 
     layerDFT.Call(signalA)
-    spectrumA = layerDFT.GetSignal()
+    spectrumA = layerDFT.getSignal()
 
     layerDFT.Call(signalB)
-    spectrumB = layerDFT.GetSignal()
+    spectrumB = layerDFT.getSignal()
 
-    plt.plot(layerDFT.GetFreqAxis(),spectrumA)
+    plt.plot(layerDFT.getFreqAxis(),spectrumA)
     plt.show()
 
     """
@@ -61,12 +61,12 @@ if __name__ == "__main__":
     We also need to get the frequency-space axis from the DFT layer to use as the x-axis of the plot layer
     """
 
-    freqAxis = layerDFT.GetFreqAxis()
+    freqAxis = layerDFT.getFreqAxis()
     layerPlotSpectrum = Layers.PlotSignal("Plot_Layer",sampleRate=sampleRate,inputShape=(nSamples,),
                                   show=True,save=False,xAxis=freqAxis)
-    layerPlotSpectrum.Initialize(inputShape=(nSamples,))
+    layerPlotSpectrum.initialize(inputShape=(nSamples,))
 
-    layerPlotSpectrum.Call(spectrumA)
-    layerPlotSpectrum.Call(spectrumB)
+    layerPlotSpectrum.call(spectrumA)
+    layerPlotSpectrum.call(spectrumB)
 
     sys.exit(0)
