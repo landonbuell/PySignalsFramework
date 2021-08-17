@@ -39,14 +39,14 @@ class LinearSystem:
 
     """ Public Interface """
 
-    def Add(self,newLayer):
+    def add(self,newLayer):
         """ Add a new Layer to this Layer Chain """
         self._layerChain.Append(newLayer)
         self._nLayers += 1
         self._isInit = False
         return self
 
-    def Pop(self):
+    def pop(self):
         """ Remove a layer from the end of the layer chain """
         removedLayer =  self._layerChain.PopFromTail()
         self._nLayers -= 1;
@@ -63,7 +63,7 @@ class LinearSystem:
         """ Call Each layer in chain with Inputs X """
         if (self._isInit != True):
             raise Exception("Chain Not Initialized!")
-        if (X.shape != self.GetInputShape):     # shapes are not equal
+        if (X.shape != self.getInputShape):     # shapes are not equal
             self.InitializeChain(X.shape)       # Re-init Chain w/ shape
 
         # Call the Layer Chain
@@ -72,47 +72,41 @@ class LinearSystem:
        
     """ Getter & Setter Methods """
 
-    @property
-    def Name(self):
+    def getName(self):
         """ Get the Name of this Effects System """
         return self._name
 
-    @property
-    def Type(self):
+    def getType(self):
         """ Get Type of this Effects System """
         return self._type
 
-    def GetLayerChainInst(self):
+    def getLayerChainInst(self):
         """ Get the LayerChain as the Instance """
         return self._layerChain
 
-    def GetLayerChainList(self):
+    def getLayerChainList(self):
         """ Get the LayerChain as a List """
-        return self._layerChain.GetChainlist()
+        return self._layerChain.getChainlist()
 
-    @property
-    def Input(self):
+    def getInput(self):
         """ Get input Layer of Chain """
-        return self._layerChain.GetInput
+        return self._layerChain.getInput()
 
-    @property
-    def Output(self):
+    def getOutput(self):
         """ Get output Layer of Chain """
-        return self._layerChain.GetOutput
+        return self._layerChain.GetOutput()
 
-    @property
-    def GetInputShape(self):
+    def getInputShape(self):
         """ Return the inputShape of this System """
-        return self._layerChain.GetInput.GetInputShape
+        return self._layerChain.getInput().GetInputShape()
 
-    @property
-    def GetOutputShape(self):
+    def getOutputShape(self):
         """ Return the inputShape of this System """
-        return self._layerChain.GetOuput.GetOutputShape
+        return self._layerChain.getOutput().getOutputShape()
 
-    def SetSampleRate(self,x):
+    def setSampleRate(self,x):
         """ Set All Layers to new Sample Rate """
-        self._layerChain.SetSampleRate(x)
+        self._layerChain.setSampleRate(x)
         return self
 
     """ Magic Methods """
@@ -128,6 +122,3 @@ class LinearSystem:
     def __len__(self):
         """ Return Number of layers in the module """
         return self._nLayers
-
-    def __iter__(self):
-        """ Iterator Through the Effect System Layers """

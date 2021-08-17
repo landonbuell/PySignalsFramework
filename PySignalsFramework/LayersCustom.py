@@ -76,28 +76,28 @@ class ClipOverdriveLayer(Layers.AbstractLayer):
 
     """ Public Interface """
 
-    def Initialize(self, inputShape, **kwargs):
+    def initialize(self, inputShape, **kwargs):
         """ Initialize This Layer Instance """
         super().Initialize(inputShape, **kwargs)
 
         return self
 
-    def Call(self,X):
+    def call(self,X):
         """ Call this Layer with Inputs X """
-        super().Call(X)
+        super().call(X)
         self._signal = np.copy(X)
         maxAmp = np.max(np.abs(self._signal))
-        self.SetCurrentThreshold( maxAmp * self._thresholdBase)
+        self.setThreshold( maxAmp * self._thresholdBase)
         # Apply Clipping Functions
         if self._softClip:
-            self.SoftClipSignal()
+            self.softClipSignal()
         else:
-            self.HardClipSignal()
+            self.hardClipSignal()
         return self._signal
 
     """ Protected Interface """
 
-    def HardClipSignal(self):
+    def hardClipSignal(self):
         """ Apply Hard Clipping to Signal """
         for i in range(self._signal.shape[-1]):
             currSample = self._signal[i]
@@ -109,7 +109,7 @@ class ClipOverdriveLayer(Layers.AbstractLayer):
                 continue
         return None
 
-    def SoftClipSignal(self):
+    def softClipSignal(self):
         """ Apply Soft Clipping to Signal """
         for i in range(self._signal.shape[-1]):
             X = self._signal[i]
@@ -121,20 +121,14 @@ class ClipOverdriveLayer(Layers.AbstractLayer):
                 continue
         return None
 
-    def SoftClipLog(self,X):
-        """ Helper Function for Soft Clipping """
-        #diff = X - self._thresholdCurr
-        return 
-
     """ Getter & Setter Methods """
 
-    def SetCurrentThreshold(self,x=None):
+    def setThreshold(self,x=None):
         """ Set the current Threshold for Clipping """
         self._thresholdCurr = x
         return self
 
-    @property
-    def GetCurrentThreshold(self):
+    def getThreshold(self):
         """ get the current threshold for clipping """
         return self._thresholdCurr
 
@@ -166,19 +160,19 @@ class SigmoidOverdriveLayer(Layers.AbstractLayer):
 
     """ Public Interface """
 
-    def Initialize(self, inputShape, **kwargs):
+    def initialize(self, inputShape, **kwargs):
         """ Initialize This Layer Instance """
         return super().Initialize(inputShape, **kwargs)
 
-    def Call(self,X):
-        """ Call this Layer with Inputs X """
-        super().Call(X)
-        self._signal = self.SigmoidDistortion(X)
+    def call(self,X):
+        """ call this Layer with Inputs X """
+        super().call(X)
+        self._signal = self.sigmoidDistortion(X)
         return self._signal
 
     """ Protected Interface """
 
-    def SigmoidDistortion(self,X):
+    def sigmoidDistortion(self,X):
         """ Sigmoid Clipping to Signal """
         b = 2.0
         Y = 2*((1 / (1 + np.exp(-b*X))) - 0.5 )
