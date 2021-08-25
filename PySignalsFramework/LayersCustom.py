@@ -1,8 +1,10 @@
 """
-PySignalsFramework
-LayersCustom.py
-Landon Buell
-5 Feb 2021
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalFramework
+File:           LayersCustom.py
+Description:
 """
 
             #### IMPORTS ####

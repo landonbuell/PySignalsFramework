@@ -1,8 +1,10 @@
 """
-PySignalsFramework
-EffectsSystems.py
-Landon Buell
-7 Feb 2021
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalFramework
+File:           EffectsSystem.py
+Description:
 """
 
         #### IMPORTS ####
@@ -16,13 +18,10 @@ class LinearSystem:
     EffectsSystem Type -
         Parent container for all classes in this package
     --------------------------------
-    _name (str) : Name for user- Identification
-    _type (str) : Type of EffectsSystem
-    
-    _layerChain (LayerChainLinear) : 
-    _nLayers (int) : Number of layers in chain
-
-    _isInit (bool) : T/F if layer chain is initialized for use
+    str     _name       Name for user- Identification
+    str     _type       Type of EffectsSystem
+    bool    _isInit     T/F if layer chain is initialized for use
+    LayerChainLinear _layerChain
     --------------------------------
     Return Instatiated EffectsSystem
     """

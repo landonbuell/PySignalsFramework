@@ -1,8 +1,10 @@
 """
-PySignalsFramework
-LayerChain.py
-Landon Buell
-5 Feb 2021
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalFramework
+File:           LayerChain.py
+Description:
 """
 
             #### IMPORTS ####
@@ -17,13 +19,11 @@ class LayerChainLinear :
     Linear Layer Chain Type - 
         Acts as double Linked list of Layers
     --------------------------------
-    _name (str) : 
-    _type (str) : Type of Layer Chain
-
-    _head (LayerAbstract) : Head Layer in Chain [readonly]
-    _tail (LayerAbstract) : Tail Layer in Chain [readonly]
-
-    _size (int) : Number of non-sentinel nodes in Layer
+    str         _name       Name to Identify chain instance
+    str         _type       Str type of layer chain
+    LayerIO     _head       Head Layer in Chain [readonly]
+    LayerIO     _tail       Tail Layer in Chain [readonly]
+    int         _size       Number of Non-Sentinel nodes in the chain
     --------------------------------
     Return Instantiated LinearLayerChain
     """

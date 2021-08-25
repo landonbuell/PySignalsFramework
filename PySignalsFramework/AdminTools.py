@@ -1,11 +1,13 @@
 """
-PySignalsFramework
-AdminTools.py
-Landon Buell
-14 June 2021
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalFramework
+File:           AdminTools.py
+Description:
 """
 
-def setmodule(module):
+def setModule(module):
     """
     Decorator for overriding __module__ on a function or class.
 

@@ -1,8 +1,10 @@
 """
-Landon Buell
-EffectsEmmulatorPython
-Toy Audio Samples
-5 Feb 2020
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalFramework
+File:           AudioTools.py
+Description:
 """
 
                 #### IMPORTS ####
@@ -12,19 +14,18 @@ import matplotlib.pyplot as plt
 import scipy.signal as scisig
 import scipy.io.wavfile
 
-
                 #### CLASS DEFINITIONS ####
 
 class WavesGenerator :
     """
     SimpleWaves Type - Methods to create signals of any length and component frequencies 
     --------------------------------
-    _time (arr[int]) : 1 x N shaped array
-    _nVals (int) : Number of frequencies in signal
-    _freq (arr[float]) : 1 x M array of linear - frequency values
-    _amps (arr[float]) : 1 x M array of amplitude coefficients
-    _phas (arr[float]) : 1 x M array of phase shifts
-    _sampleRate (int) : Sample rate for this audio
+    arr[int]    _time       1 x N shaped array
+    int         _nVals      Number of frequencies in signal
+    arr[float]  _freq       1 x M array of linear - frequency values
+    arr[float]  _amps       1 x M array of amplitude coefficients
+    arr[float]  _phas       1 x M array of phase shifts
+    int         _sampleRate Sample rate for this audio
     --------------------------------
     """
 
@@ -117,6 +118,10 @@ class WavesGenerator :
 class SimpleWavesGenerator:
     """
     Static Class of methods to Generate Simple Waveforms
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
     """
 
     def __init__(self):
@@ -156,6 +161,10 @@ class SimpleWavesGenerator:
 class AudioIO :
     """
     Static Class of methods to Input/Output
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
     """
 
     def __init__(self):
@@ -200,6 +209,10 @@ class AudioIO :
 class WindowFunctions :
     """
     static class of window functions
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
     """
 
     def __init__(self):
@@ -224,17 +237,25 @@ class WindowFunctions :
 
 class AudioSamples:
     """
-
+    Load in Locally stored audio samples
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
     """
 
     def __init__(self):
         """ False Constructor for Plotting Static Class - Raises Error """
-        raise TypeError("Type 'Plotting' is a static class - cannot make instance")
+        raise TypeError("Type 'AudioSamples' is a static class - cannot make instance")
 
 
 class Plotting:
     """
     Class of Static methods to provide matplotlib visualizations of data
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
     """
 
     def __init__(self):
@@ -243,18 +264,7 @@ class Plotting:
 
     @staticmethod
     def plotTimeSeries(xData,yData,labels=[],title="",save=False,show=True):
-        """
-        Plot Time-series information in Matplotlib figure
-        --------------------------------
-        xData (list/arr) : n-Dim array of values to plot as x-axis values
-        yData (list/arr) : n-Dim array of values to plot as y-axis values
-        labels (list) : List of strings to use as column lables
-        title (str) : String of text to use as plot title / save name
-        save (bool) : If true, save the figure to the current working directory
-        show (bool) : If true, plot the figure to console
-        --------------------------------
-        Optionally save/show plot
-        """
+        """ Plot Time-series information in Matplotlib figure """
         plt.figure(figsize=(16,12))
         plt.title(label=title,size=40,weight='bold')
         plt.xlabel("Time [samples]",size=20,weight='bold')
@@ -283,38 +293,16 @@ class Plotting:
         plt.close()
         return None
         
-
     @staticmethod
     def plotFrequencySeries(xData,yData,labels=[],title="",save=False,show=True):
-        """
-        Plot Time-series information in Matplotlib figure
-        --------------------------------
-        xData (list/arr) : n-Dim array of values to plot as x-axis values
-        yData (list/arr) : n-Dim array of values to plot as y-axis values
-        labels (list) : List of strings to use as column lables
-        title (str) : String of text to use as plot title / save name
-        save (bool) : If true, save the figure to the current working directory
-        show (bool) : If true, plot the figure to console
-        --------------------------------
-        Optionally save/show plot
-        """
+        """ Plot Frequency-series information in Matplotlib figure """
         return None
 
     @staticmethod
     def plotGeneric(xData,yData,labels=[],title="",save=False,show=True):
-        """
-        Plot Time-series information in Matplotlib figure
-        --------------------------------
-        xData (list/arr) : n-Dim array of values to plot as x-axis values
-        yData (list/arr) : n-Dim array of values to plot as y-axis values
-        labels (list) : List of strings to use as column lables
-        title (str) : String of text to use as plot title / save name
-        save (bool) : If true, save the figure to the current working directory
-        show (bool) : If true, plot the figure to console
-        --------------------------------
-        Optionally save/show plot
-        """
-        
+        """ Plot Generic Information in Matplotlib Figure """
+
+        # Init Figures        
         plt.figure(figsize=(16,12),facecolor='gray')
         plt.title(title,size=40,weight='bold')
         plt.xlabel("X - Axis",size=30,weight='bold')
