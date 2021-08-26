@@ -16,6 +16,112 @@ import scipy.io.wavfile
 
                 #### CLASS DEFINITIONS ####
 
+class Signal:
+    """
+    Signal Data Type
+        Holds Data for time-series or frequency-series data
+    --------------------------------
+    arr[float]      _data           Array to hold signal data
+    str             _domain         Indicate if signal is in time/freq domain
+    int             _sampleRate     Sample rate of data in the signal
+    --------------------------------
+
+    """
+
+    def __init__(self,data,domain,sampleRate=44100):
+        """ Constructor for Signal Instance """
+        self._data = data
+        self._domain = None
+        self._sampleRate = sampleRate
+        setDomain(domain)
+
+    def __del__(self):
+        """ Destructor for Signal Instance """
+        pass
+
+    def deepCopy(self):
+        """ Copy Constructor for Signal Instance """
+        result = Signal(np.copy(self._data),self._domain,self._sampleRate)
+        return result
+
+    """ Getters and Setters """
+
+    def getData(self):
+        """ Get the raw Signal Array """
+        return self._data
+
+    def setData(self):
+        """ Set the raw Signal Array """
+        if (type(x) != np.ndarray):
+            raise TypeError("Domain must be of type np.ndarray")
+        self._data = x
+        return self
+    
+    def getDomain(self):
+        """ Get if Signal is in Time or Freq Domain """
+        return self._domain
+
+    def setDomain(self,x):
+        """ Set if Signal is in TIme of Freq Domain """
+        if (type(x) != str):
+            raise TypeError("Domain must be of type string")
+        if (x.upper() not in ["TIME","FREQ"]):
+            raise ValueError("Domain must be 'time' or 'freq'!")
+        self._domain = x.upper()
+        return self
+
+    def getSampleRate(self):
+        """ Get the Sample Rate """
+        return self._sampleRate
+        
+    def setSampleRate(self,x):
+        """ Set the Sample Rate """
+        self._sampleRate = x
+        return self
+
+    def getShape(self):
+        """ Get the Shape of the Signal """
+        return self._data.shape
+
+    def setShape(self,x):
+        """ Set the Shape of the Signal """
+        self._data.reshape(x)
+        return self
+
+    """ Magic Methods """
+
+    def __str__(self):
+        """ Return String Representation of Instance """
+        result = ""
+        result += self.getDomain() + " signal"
+        return result
+
+    def __repr__(self):
+        """ Return Programmer String representation of Instance """
+        result = ""
+        result += self.getDomain() + " signal w/ "
+        result += "shape " + [str(x) for x in self._data.shape]
+        return result
+
+    def __getitem__(self,idx):
+        """ Overload Index Operator """
+        return self._data[idx]
+
+    def __iter__(self):
+        """ Define Forward Iterator for Signal Instance """
+        for val in self._data:
+            yield val
+
+    def __add__(self,x):
+        """ Overload Addition Operator """
+        return self._data + x
+
+    def __sub__(self,x):
+        """ Overload Subtraction Operator """
+        return self._data - x
+
+
+
 class WavesGenerator :
     """
     SimpleWaves Type - Methods to create signals of any length and component frequencies 
