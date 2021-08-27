@@ -27,16 +27,14 @@ class BasicDelay(Layers.AbstractLayer):
         Abstract Base Type for all Layer Classes
         Acts as node in double linked list LayerChain
     --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     _decayEnvelope (func) : Function to model decay envelope
     --------------------------------
@@ -50,16 +48,14 @@ class ClipOverdriveLayer(Layers.AbstractLayer):
         Abstract Base Type for all Layer Classes
         Acts as node in double linked list LayerChain
     --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     _thresholdBase (float) : percent threshold to begin clipping
     _thresholdCurr (float) : Actuall threshold to clip based on max/min amp   
@@ -140,16 +136,14 @@ class SigmoidOverdriveLayer(Layers.AbstractLayer):
         Abstract Base Type for all Layer Classes
         Acts as node in double linked list LayerChain
     --------------------------------
-    _name (str) : Name for user-level identification
-    _type (str) : Type of Layer Instance
-    _sampleRate (int) : Number of samples per second  
-    _chainIndex (int) : Location where Layer sits in chain 
-    _next (AbstractParentLayer) : Next layer in the layer chain
-    _prev (AbstractParentLayer) : Prev layer in the layer chain  
-    _shapeInput (tup) : Indicates shape (and rank) of layer input
-    _shapeOutput (tup) : Indicates shape (and rank) of layer output
-    _initialized (bool) : Indicates if Layer has been initialized    
-    _signal (arr) : Signal from Transform  
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     _overdriveFunction (func) : function to transform Signal
     --------------------------------

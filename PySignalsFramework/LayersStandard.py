@@ -26,14 +26,14 @@ class AbstractLayer :
         Abstract Base Type for all Layer Classes
         Acts as node in double linked list LayerChain
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
     --------------------------------
     Abstract class - Make no instance
     """
@@ -191,14 +191,14 @@ class AnalysisFramesConstructor (AbstractLayer):
         Decompose a 1D time-domain signal into a 2D Signal of
         Short-time analysis frames w/ optional head and tail padding
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     int         _samplesPerFrame    Number of samples used in each analysisFrame
     float       _percentOverlap     Indicates percentage overlap between adjacent frames [0,1)
@@ -314,14 +314,14 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
     AnalysisFramesDestructor Layer Type - 
         Destruct 2D array of analysis frames into 1D input waveform
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     int         _samplesPerFrame    Number of samples used in each analysisFrame
     float       _percentOverlap     Indicates percentage overlap between adjacent frames [0,1)
@@ -382,14 +382,14 @@ class Customcallable (AbstractLayer):
     """
     Customcallable Type - Returns User defined transformation 
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation  
 
     callable    _callable           User-denfined or desired function transformation
     list        _callArgs           List of arguments to pass to callable function
@@ -423,14 +423,14 @@ class DiscreteFourierTransform(AbstractLayer):
     DiscreteFourierTransform - 
         Apply Discrete Fourier Transform to input signal
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation ion
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     arr[float]  _freqAxis           Frequency Space Axis values
     --------------------------------
@@ -485,14 +485,14 @@ class DiscreteInvFourierTransform(AbstractLayer):
     DiscreteInvFourierTransform - 
         Apply Inverse Discrete Fourier Transform to input signal
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
     --------------------------------
     """
     def __init__(self,name,inputShape=None,next=None,prev=None):
@@ -528,14 +528,14 @@ class Equilizer(AbstractLayer) :
     Equilizer - 
         Parent Class of all N-band Equilizers
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation  
 
     list[bands] _bands              Bands to apply to this equilizer
     --------------------------------
@@ -575,14 +575,14 @@ class IdentityLayer (AbstractLayer):
     IdentityLayer Type - 
         Provides no Transformation of input, serves as placeholder layer if needed       
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation  
     --------------------------------
     Return Instantiated identityLayer
     """
@@ -600,14 +600,14 @@ class IOLayer (AbstractLayer):
         Holds Input/Output Signals For Processing
         Commonly used as Head/Tail nodes in LayerChain
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation  
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation   
     --------------------------------
     Return instantiated AnalysisFrames Object 
     """
@@ -651,14 +651,14 @@ class ScaleAmplitudeLayer(AbstractLayer):
         Plot 1D or 2D signal in Time or Frequncy Space.
         Optionally show figure to console and/or save to specified directory
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation  
 
     float       _const              Min/Max of signal will be this value
     float       _scaleFactor        Value Required to scale amplitude to desire values
@@ -905,14 +905,14 @@ class WindowFunction (AbstractLayer):
          Apply a specified Window function (or callable) to a
          1D or 2D signal
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation  
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation   
     
     int             _nSamples           Number of samples that the window is applied to
     int             _padTail            Number of zeros to tail pad the window with

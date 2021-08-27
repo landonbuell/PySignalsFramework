@@ -16,24 +16,87 @@ import scipy.io.wavfile
 
                 #### CLASS DEFINITIONS ####
 
+class AudioIO :
+    """
+    Static Class of methods to Input/Output Audio
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
+    """
+
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'AudioIO' is a static class - cannot make instance")
+
+    @staticmethod
+    def readWAV(localPath,channels="all"):
+        """ Read wav Audio file and return sample rate and audio data """
+        rate,data = scipy.io.wavfile.read(localPath)
+        if channels.capitalize() in ["All","BOTH","LR"]:
+            return rate,data.transpose()
+        elif channels.capitalize() in ["LEFT","L"]:
+            return rate,data.transpose()[0]
+        elif channels.capitalize() in ["Right","R"]:
+            return rate,data.transpose()[1]
+        else:
+            raise ValueError("Channels keyword must be in [left,right,all]")
+
+    @staticmethod
+    def readTXT(localPath,cols,sampleRate=44100):
+        """ Read txt Audio file and return sampl rate and audio data """
+        raise NotImplementedError()
+
+    @staticmethod
+    def writeWAV(localPath,signal,sampleRate):
+        """ Write wav Audio file to local path """
+        try:
+            signal = signal.astype('int32')
+            scipy.io.wavfile.write(localPath,sampleRate,signal)
+            return True
+        except Exception as expt:
+            print(expt)
+            return False
+
+    @staticmethod
+    def writeTXT(localPath,signal):
+        """ Write txt Audio file to local path """
+        raise NotImplementedError()
+
+class AudioSamples:
+    """
+    Load in Locally stored audio samples
+    --------------------------------
+    [No member variables for static class]
+    --------------------------------
+    Make No Instance
+    """
+
+    def __init__(self):
+        """ False Constructor for Plotting Static Class - Raises Error """
+        raise TypeError("Type 'AudioSamples' is a static class - cannot make instance")
+
 class Signal:
     """
     Signal Data Type
         Holds Data for time-series or frequency-series data
     --------------------------------
-    arr[float]      _data           Array to hold signal data
-    str             _domain         Indicate if signal is in time/freq domain
-    int             _sampleRate     Sample rate of data in the signal
+    _data           arr[float]          Array to hold signal data
+    _domain         str                 Indicate if signal is in time/freq domain
+    _sampleRate     int                 Sample rate of data in the signal
     --------------------------------
 
     """
 
-    def __init__(self,data,domain,sampleRate=44100):
+    def __init__(self,data,domain='time',sampleRate=44100):
         """ Constructor for Signal Instance """
-        self._data = data
+        self._data = None
         self._domain = None
-        self._sampleRate = sampleRate
-        setDomain(domain)
+        self._sampleRate = None
+
+        self.setData(data)
+        self.setDomain(domain)
+        self.setSampleRate(sampleRate)
 
     def __del__(self):
         """ Destructor for Signal Instance """
@@ -63,10 +126,8 @@ class Signal:
 
     def setDomain(self,x):
         """ Set if Signal is in TIme of Freq Domain """
-        if (type(x) != str):
-            raise TypeError("Domain must be of type string")
         if (x.upper() not in ["TIME","FREQ"]):
-            raise ValueError("Domain must be 'time' or 'freq'!")
+            raise ValueError("Domain must be a string, either 'time' or 'freq'!")
         self._domain = x.upper()
         return self
 
@@ -76,7 +137,10 @@ class Signal:
         
     def setSampleRate(self,x):
         """ Set the Sample Rate """
-        self._sampleRate = x
+        if (x <= 0):
+            raise ValueError("Sample Rate must be Greater than or equal to Zero")
+        else:
+            self._sampleRate = x
         return self
 
     def getShape(self):
@@ -85,8 +149,13 @@ class Signal:
 
     def setShape(self,x):
         """ Set the Shape of the Signal """
-        self._data.reshape(x)
+        if (len(x) > 2):
+            raise ValueError("Signal must be 1 or 2 dim, but got " + str(len(x)))
+        else:
+            self._data.reshape(x)
         return self
+
+    """ Public Interface """
 
     """ Magic Methods """
 
@@ -100,7 +169,7 @@ class Signal:
         """ Return Programmer String representation of Instance """
         result = ""
         result += self.getDomain() + " signal w/ "
-        result += "shape " + [str(x) for x in self._data.shape]
+        result += "shape: " + [str(x) for x in self._data.shape]
         return result
 
     def __getitem__(self,idx):
@@ -126,12 +195,12 @@ class WavesGenerator :
     """
     SimpleWaves Type - Methods to create signals of any length and component frequencies 
     --------------------------------
-    arr[int]    _time       1 x N shaped array
-    int         _nVals      Number of frequencies in signal
-    arr[float]  _freq       1 x M array of linear - frequency values
-    arr[float]  _amps       1 x M array of amplitude coefficients
-    arr[float]  _phas       1 x M array of phase shifts
-    int         _sampleRate Sample rate for this audio
+    _time           arr[int]        1 x N shaped array
+    _nVals          int             Number of frequencies in signal
+    _freq           arr[float]      1 x M array of linear - frequency values
+    _amps           arr[float]      1 x M array of amplitude coefficients
+    _phas           arr[float]      1 x M array of phase shifts
+    _sampleRate     int             Sample rate for this audio
     --------------------------------
     """
 
@@ -264,52 +333,7 @@ class SimpleWavesGenerator:
         signal = scisig.sawtooth(2*np.pi*freq*time + phase,width=0.5)
         return signal
 
-class AudioIO :
-    """
-    Static Class of methods to Input/Output
-    --------------------------------
-    [No member variables for static class]
-    --------------------------------
-    Make No Instance
-    """
 
-    def __init__(self):
-        """ False Constructor for Plotting Static Class - Raises Error """
-        raise TypeError("Type 'AudioIO' is a static class - cannot make instance")
-
-    @staticmethod
-    def readWAV(localPath,channels="all"):
-        """ Read wav Audio file and return sample rate and audio data """
-        rate,data = scipy.io.wavfile.read(localPath)
-        if channels.capitalize() in ["All","BOTH","LR"]:
-            return rate,data.transpose()
-        elif channels.capitalize() in ["LEFT","L"]:
-            return rate,data.transpose()[0]
-        elif channels.capitalize() in ["Right","R"]:
-            return rate,data.transpose()[1]
-        else:
-            raise ValueError("Channels keyword must be in [left,right,all]")
-
-    @staticmethod
-    def readTXT(localPath,cols,sampleRate=44100):
-        """ Read txt Audio file and return sampl rate and audio data """
-        raise NotImplementedError()
-
-    @staticmethod
-    def writeWAV(localPath,signal,sampleRate):
-        """ Write wav Audio file to local path """
-        try:
-            signal = signal.astype('int32')
-            scipy.io.wavfile.write(localPath,sampleRate,signal)
-            return True
-        except Exception as expt:
-            print(expt)
-            return False
-
-    @staticmethod
-    def writeTXT(localPath,signal):
-        """ Write txt Audio file to local path """
-        raise NotImplementedError()
 
 
 class WindowFunctions :
@@ -341,18 +365,7 @@ class WindowFunctions :
         """ Get Hanning Window that is nSamples Long """
         return scisig.windows.gaussian(nSamples)
 
-class AudioSamples:
-    """
-    Load in Locally stored audio samples
-    --------------------------------
-    [No member variables for static class]
-    --------------------------------
-    Make No Instance
-    """
 
-    def __init__(self):
-        """ False Constructor for Plotting Static Class - Raises Error """
-        raise TypeError("Type 'AudioSamples' is a static class - cannot make instance")
 
 
 class Plotting:

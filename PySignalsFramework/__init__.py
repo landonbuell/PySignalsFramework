@@ -7,6 +7,29 @@ Landon Buell
 
         #### IMPORTS ####
 
+__version__ = "Indevelopment"
+
+__doc__ = \
+"""
+NAME:   PySignalsFramework
+
+DESCRIPTION: Python Framework of Digital Signal Processing Tools
+
+CONTENTS:
+
+    Namespace: AdminTools
+
+    Namespace: AudioTools
+
+    Namespace: Effects Systems
+
+    Namespace: LayerChain
+
+    Namespace: LayersCustom
+
+    Namespace: LayersStandard
+
+"""
 
 # IMPORT NUMPY
 try:
