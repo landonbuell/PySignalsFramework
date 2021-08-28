@@ -47,7 +47,9 @@ class AbstractLayer :
         self._next = None                       # temporarily set next
         self._prev = None                       # temporarily set prev
         self._isInit = False                    # T/F is chain has been initialzed
-        self._signal = np.array([])             # output Signal
+        
+        self._signal = AudioTools.Signal(
+            data=None,shape=inputShape)         # Place to Hold Signal 
 
         self.coupleToNext(next)                 # connect to next Layer
         self.coupleToPrev(prev)                 # connect to prev Layer
@@ -67,19 +69,21 @@ class AbstractLayer :
   
     """ Public Interface """
 
-    def initialize (self,inputShape,**kwargs):
+    def initialize (self,inputShape=None,**kwargs):
         """ Initialize this layer for usage in chain """
-        self.setInputShape(inputShape)
-        self.setOutputShape(inputShape)
-        self._signal = np.empty(self._shapeOutput)
-        self._init = True
+        if (inputShape is not None):
+            self.setInputShape(inputShape)
+            self.setOutputShape(inputShape)
+        self._isInit = True
         return self
 
     def call (self,X):
         """ call this Layer with inputs X """
         if self._init == False:      # Not Initialized
-            errMsg = self.__str__() + " has not been initialized\n\t" + "call <instance>.Initialize() before use"
-            raise NotImplementedError(errMsg)       
+            errMsg = self.__str__() + " has not been initialized\n\t" + "call <instance>.initialize() before use"
+            raise NotImplementedError(errMsg)
+        if (type(X) != AudioTools.Signal):
+            X = AudioTools.Signal(X)        # cast to Signal Obj
         return X
 
     def describe(self,detail=1):
@@ -95,7 +99,7 @@ class AbstractLayer :
             otherLayer._prev = self
         else:
             self._next = None
-        self._init = False
+        self._isInit = False
         return self
 
     def coupleToPrev(self,otherLayer):
@@ -105,7 +109,7 @@ class AbstractLayer :
             otherLayer._next = self
         else:
             self._prev = None
-        self._init = False
+        self._isInit = False    
         return self
 
     """ Getter & Setter Methods """
@@ -135,6 +139,7 @@ class AbstractLayer :
     def setOutputShape(self,x):
         """ Set the output shape of this layer """
         self._shapeOutput = x
+        self._signal.setShape(x)
         self._init = False
         return self
 
@@ -444,7 +449,6 @@ class DiscreteFourierTransform(AbstractLayer):
     def __init__(self,name,inputShape=None,next=None,prev=None):
         """ Constructor for DiscreteFourierTransform Layer Instance """
         super().__init__(name,"DiscreteFourierTransform",inputShape,next,prev)   
-        self._freqAxis = np.array([])
 
     def __del__(self):
         """ Destructor for DiscreteFourierTransform Instance """
@@ -455,9 +459,7 @@ class DiscreteFourierTransform(AbstractLayer):
     def initialize(self,inputShape=None,**kwargs):
         """ initialize Current Layer """
         super().initialize(inputShape,**kwargs)     
-        self._signal = self._signal.astype('complex64')
-        sampleSpacing = 1 / self._sampleRate
-        self._freqAxis = fftpack.fftfreq(self._shapeOutput[-1],sampleSpacing)
+        self._signal.setDataType('complex64')
         return self
 
     def call(self,X):

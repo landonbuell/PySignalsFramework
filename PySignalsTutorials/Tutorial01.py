@@ -34,19 +34,21 @@ if __name__ == "__main__":
     To Analyze the signals in frequency space, we apply a Discrete-Fourier-Transform (DFT)
     To each signal to find the frequency components.
     Let's make an Instance of the 'DiscreteFourierTransformLayer' from the 'LayersStandard' namespace
-    We give the layer a name, sample rate, input shape, and 'initialize' it for usage
+    We give the layer a name and an input shape, and 'initialize' it for usage
     """
 
     sampleRate = 1024
-    layerDFT = Layers.DiscreteFourierTransform("DFT_Layer",sampleRate=sampleRate,inputShape=(nSamples,))
-    layerDFT.initialize(inputShape=(nSamples,))
+    layerDFT = Layers.DiscreteFourierTransform("DFT_Layer",inputShape=(nSamples,))
+    layerDFT.initialize()
 
     """ 
     We apply the DFT by passing it through the layer instance with the 'call' Method
+    The Array that we pass in (signalA or signalB) will be converted into a Instance of the
+        PySignalsFramework.AudioTools.Signal() class and will be given a default Sample Rate of 44100 Hz
     We get the output of the layer by using the 'getSignal()' method
     """
 
-    layerDFT.Call(signalA)
+    layerDFT.call(signalA)
     spectrumA = layerDFT.getSignal()
 
     layerDFT.Call(signalB)

@@ -88,7 +88,7 @@ class Signal:
 
     """
 
-    def __init__(self,data,domain='time',sampleRate=44100):
+    def __init__(self,data=None,shape=None,dType=float,domain='time',sampleRate=44100):
         """ Constructor for Signal Instance """
         self._data = None
         self._domain = None
@@ -97,6 +97,7 @@ class Signal:
         self.setData(data)
         self.setDomain(domain)
         self.setSampleRate(sampleRate)
+        self.setShape(shape)
 
     def __del__(self):
         """ Destructor for Signal Instance """
@@ -113,10 +114,12 @@ class Signal:
         """ Get the raw Signal Array """
         return self._data
 
-    def setData(self):
+    def setData(self,x):
         """ Set the raw Signal Array """
-        if (type(x) != np.ndarray):
-            raise TypeError("Domain must be of type np.ndarray")
+        if (x is None):
+            self._data = x
+        elif (type(x) != np.ndarray):
+            x = np.array(x)
         self._data = x
         return self
     
@@ -145,17 +148,61 @@ class Signal:
 
     def getShape(self):
         """ Get the Shape of the Signal """
-        return self._data.shape
+        if (self._data):
+            return self._data.shape
+        else:
+            return (None,)
 
     def setShape(self,x):
         """ Set the Shape of the Signal """
-        if (len(x) > 2):
+        if (x is None):             # No shape Given, ignore
+            return self
+        if (len(x) > 2):            # more than 2D
             raise ValueError("Signal must be 1 or 2 dim, but got " + str(len(x)))
+        if (self._data is None):
+            self._data = np.empty(shape=x)
         else:
             self._data.reshape(x)
         return self
 
+    def getDataType(self):
+        """ Get the Data Type of the Signal """
+        if (self._data is None):        # No signal yet
+            return None
+        else:
+            return self._data.dtype
+
+    def setDataType(self,x):
+        """ Set the Data Type of the Signal """
+        try:
+            self._data = self._data.astype(dtype=x)
+            return True
+        except Exception as ecxpt:
+            print(ecxpt)
+        return False
+
     """ Public Interface """
+
+    def getTimeAxis(self):
+        """ Get the Time Axis for the Signal """
+        return None
+
+    def getFreqAxis(self):
+        """ Get the Frequency Axis for the Signal """
+        return None
+
+    def copyDataToSignal(self,otherSignal):
+        """ Create A Deep Copy of this Signal's Data """
+        try:
+            self.setData(np.copy(otherSignal.getData()))
+            return True
+        except Exception as ecxpt:
+            print(ecxpt)
+        return False
+
+    """ Private Interface """
+
+    
 
     """ Magic Methods """
 
@@ -167,8 +214,7 @@ class Signal:
 
     def __repr__(self):
         """ Return Programmer String representation of Instance """
-        result = ""
-        result += self.getDomain() + " signal w/ "
+        result = "PySignalsFramework.AudioTools.Signals object"
         result += "shape: " + [str(x) for x in self._data.shape]
         return result
 
