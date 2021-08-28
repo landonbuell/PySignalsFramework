@@ -130,7 +130,7 @@ class Signal:
     def setDomain(self,x):
         """ Set if Signal is in TIme of Freq Domain """
         if (x.upper() not in ["TIME","FREQ"]):
-            raise ValueError("Domain must be a string, either 'time' or 'freq'!")
+            raise ValueError("Domain must be a string in ['TIME','FREQ','BOTH']")
         self._domain = x.upper()
         return self
 

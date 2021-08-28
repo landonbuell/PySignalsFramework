@@ -54,21 +54,11 @@ if __name__ == "__main__":
     layerDFT.Call(signalB)
     spectrumB = layerDFT.getSignal()
 
-    plt.plot(layerDFT.getFreqAxis(),spectrumA)
-    plt.show()
-
     """
     To make sure it worked, we can plot the result using the 'PlotSignal' layer from the 'LayersStandard' namespace
-    This will let us visualize the resulting Signal to visualize.
+    This will let us visualize the resulting Signal in Frequncy Space
     We also need to get the frequency-space axis from the DFT layer to use as the x-axis of the plot layer
     """
 
-    freqAxis = layerDFT.getFreqAxis()
-    layerPlotSpectrum = Layers.PlotSignal("Plot_Layer",sampleRate=sampleRate,inputShape=(nSamples,),
-                                  show=True,save=False,xAxis=freqAxis)
-    layerPlotSpectrum.initialize(inputShape=(nSamples,))
-
-    layerPlotSpectrum.call(spectrumA)
-    layerPlotSpectrum.call(spectrumB)
 
     sys.exit(0)

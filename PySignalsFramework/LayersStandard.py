@@ -442,8 +442,6 @@ class DiscreteFourierTransform(AbstractLayer):
     _prev           AbstractLayer       Prev layer in the layer chain      
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
-
-    _freqAxis       arr[float]          Frequency Space Axis values
     --------------------------------
     """
     def __init__(self,name,inputShape=None,next=None,prev=None):
@@ -465,28 +463,35 @@ class DiscreteFourierTransform(AbstractLayer):
     def call(self,X):
         """ call this Layer w/ Inputs X """
         super().call(X)
-        self.transform(X)
+        self.transform(X,getData())
+        self.setSignalDomain()
         return self._signal
 
     """ Protected Interface """
 
-    def transform(self,X):
+    def transform(self,arr):
         """ Execute Discrete Fourier Transform on Signal X """
-        nSamples = X.shape[-1]
-        X = fftpack.fft(X,n=nSamples,axis=-1,overwrite_x=True)
-        np.copyto(self._signal,X)
+
+        nSamples = arr.shape[-1]
+        arr = fftpack.fft(arr,nSamples,axis=-1,overwrite_x=True)
+        self._signal.setData(arr)
+        return self
+
+    def setSignalDomain(self):
+        """ Set Signal Domain Based on Shape """
+        if (self._signal._data.ndim == 1):
+            # 1D Signal, TIME -> FREQ
+            self._signal.setDomain("FREQ")
+        elif (self._signal._data.ndim == 2):
+            # 1D Signal, TIME -> FREQ
+            self._signal.setDomain("BOTH")
+        else:
+            # Greater than 2D signal, raise error
+            raise ValueError("Singal must be 1D or 2D!")
         return self
 
     """ Getter and Setter Methods """
 
-    def getFreqAxis(self):
-        """ Get the X-Axis Data """
-        return self._freqAxis
-
-    def setFreqAxis(self,x):
-        """ Set the X-Axis Data """
-        self._freqAxis = x
-        return self
 
 class DiscreteInvFourierTransform(AbstractLayer):
     """
@@ -729,14 +734,14 @@ class PlotSignal(AbstractLayer):
         Plot 1D or 2D signal in Time or Frequncy Space.
         Optionally show figure to console and/or save to specified directory
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     _savePath       str                 Local path where plot of 1D signal is exported to
     _figureName     str                 Name to save local plots
@@ -836,14 +841,14 @@ class PlotSpectrogram (PlotSignal):
         Plot 2D spectrogram as color-coded heat map in Time and Frequncy Space.
         Optionally show figure to console and/or save to specified directory
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
 
     _savePath       str                 Local path where plot of 1D signal is exported to
     _figureName     str                 Name to save local plots
@@ -885,14 +890,14 @@ class ResampleLayer (AbstractLayer):
     Resample Layer -
         Resample Signal to Desired Sample Rate
     --------------------------------
-    str             _name               Name for user-level identification
-    str             _type               Type of Layer Instance
-    tup[int]        _shapeInput         Indicates shape (and rank) of layer input
-    tup[int]        _shapeOutput        Indicates shape (and rank) of layer output
-    AbstractLayer   _next               Next layer in the layer chain
-    AbstractLayer   _prev               Prev layer in the layer chain      
-    bool            _isInit             Indicates if Layer has been initialized    
-    Signal          _signal             Signal Resulting from transformation 
+    _name           string              Name for user-level identification
+    _type           string              Type of Layer Instance
+    _shapeInput     tuple[int]          Indicates shape (and rank) of layer input
+    _shapeOutput    tuple[int]          Indicates shape (and rank) of layer output
+    _next           AbstractLayer       Next layer in the layer chain
+    _prev           AbstractLayer       Prev layer in the layer chain      
+    _isInit         bool                Indicates if Layer has been initialized    
+    _signal         Signal              Signal Resulting from transformation 
     --------------------------------
     Abstract class - Make no instance
     """
