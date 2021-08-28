@@ -144,7 +144,10 @@ class AbstractLayer :
 
     def setNext(self,x):
         """ Set Next Layer in Chain """
-        self._next = x
+        if (type(x) != AbstractLayer):
+            raise TypeError("Next layer must be a sub-type of AbstractLayer")
+        else:
+            self._next = x
         return self
 
     def getPrev(self):
@@ -153,7 +156,10 @@ class AbstractLayer :
 
     def setPrev(self,x):
         """ Set Previous Layer in Chain """
-        self._prev = x
+        if (type(x) != AbstractLayer):
+            raise TypeError("Prev layer must be a sub-type of AbstractLayer")
+        else:
+            self._prev = x
         return self
 
     def getInitStatus(self):
@@ -177,7 +183,7 @@ class AbstractLayer :
 
     def __repr__(self):
         """ Programmer-level representation of this instance """
-        return self._type + ": \'" + self._name + "\' @ Idx " + str(self._chainIndex)
+        return self._type + ": \'" + self._name
 
 class AmplitudeEnvelope(AbstractLayer):
     """
@@ -200,14 +206,14 @@ class AnalysisFramesConstructor (AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    int         _samplesPerFrame    Number of samples used in each analysisFrame
-    float       _percentOverlap     Indicates percentage overlap between adjacent frames [0,1)
-    int         _overlapSamples     Number of samples overlapping
-    int         _maxFrames          Maximum number of analysis frames to use
-    int         _framesInUse        Number of frames used by 
-    int         _padTail            Number of zeros to tail-pad each analysis frame
-    int         _padHead            Number of zeros to head-pad each analysis frame
-    int         _frameSize          Size of each frame, includes samples + padding
+    _samplesPerFrame    int             Number of samples used in each analysisFrame
+    _percentOverlap     float           Indicates percentage overlap between adjacent frames [0,1)
+    _overlapSamples     int             Number of samples overlapping
+    _maxFrames          int             Maximum number of analysis frames to use
+    _framesInUse        int             Number of frames used by 
+    _padTail            int             Number of zeros to tail-pad each analysis frame
+    _padHead            int             Number of zeros to head-pad each analysis frame
+    _frameSize          int             Size of each frame, includes samples + padding
     --------------------------------
     Return instantiated AnalysisFramesConstructor Object 
     """
@@ -323,14 +329,14 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    int         _samplesPerFrame    Number of samples used in each analysisFrame
-    float       _percentOverlap     Indicates percentage overlap between adjacent frames [0,1)
-    int         _overlapSamples     Number of samples overlapping
-    int         _maxFrames          Maximum number of analysis frames to use
-    int         _framesInUse        Number of frames used by 
-    int         _padTail            Number of zeros to tail-pad each analysis frame
-    int         _padHead            Number of zeros to head-pad each analysis frame
-    int         _frameSize          Size of each frame, includes samples + padding
+    _samplesPerFrame    int             Number of samples used in each analysisFrame
+    _percentOverlap     float           Indicates percentage overlap between adjacent frames [0,1)
+    _overlapSamples     int             Number of samples overlapping
+    _maxFrames          int             Maximum number of analysis frames to use
+    _framesInUse        int             Number of frames used by 
+    _padTail            int             Number of zeros to tail-pad each analysis frame
+    _padHead            int             Number of zeros to head-pad each analysis frame
+    _frameSize          int             Size of each frame, includes samples + padding
     --------------------------------
     Return instantiated AnalysisFramesDestructor Object 
     """
@@ -391,8 +397,8 @@ class Customcallable (AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation  
 
-    callable    _callable           User-denfined or desired function transformation
-    list        _callArgs           List of arguments to pass to callable function
+    _callable       callable            User-denfined or desired function transformation
+    _callArgs       list                List of arguments to pass to callable function
     --------------------------------
     """
     def __init__(self,name,inputShape=None,next=None,prev=None,
@@ -432,7 +438,7 @@ class DiscreteFourierTransform(AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    arr[float]  _freqAxis           Frequency Space Axis values
+    _freqAxis       arr[float]          Frequency Space Axis values
     --------------------------------
     """
     def __init__(self,name,inputShape=None,next=None,prev=None):
@@ -537,7 +543,7 @@ class Equilizer(AbstractLayer) :
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation  
 
-    list[bands] _bands              Bands to apply to this equilizer
+    _bands          list[bands]         Bands to apply to this equilizer
     --------------------------------
     """
 
@@ -660,8 +666,8 @@ class ScaleAmplitudeLayer(AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation  
 
-    float       _const              Min/Max of signal will be this value
-    float       _scaleFactor        Value Required to scale amplitude to desire values
+    _const          float               Min/Max of signal will be this value
+    _scaleFactor    float               Value Required to scale amplitude to desire values
     --------------------------------
     """
     def __init__(self,name,inputShape=None,next=None,prev=None,
@@ -730,11 +736,11 @@ class PlotSignal(AbstractLayer):
     bool            _isInit             Indicates if Layer has been initialized    
     Signal          _signal             Signal Resulting from transformation 
 
-    str         _savePath           Local path where plot of 1D signal is exported to
-    str         _figureName         Name to save local plots
-    bool        _showFigure         If True, figures is displayed to console
-    bool        _saveFigure         If True, figures is saved to local drive
-    arr[float]  _xAxis              Data to use for x Axis
+    _savePath       str                 Local path where plot of 1D signal is exported to
+    _figureName     str                 Name to save local plots
+    _showFigure     bool                If True, figures is displayed to console
+    _saveFigure     bool                If True, figures is saved to local drive
+    _xAxis          arr[float]          Data to use for x Axis
     --------------------------------
     """
 
@@ -837,14 +843,14 @@ class PlotSpectrogram (PlotSignal):
     bool            _isInit             Indicates if Layer has been initialized    
     Signal          _signal             Signal Resulting from transformation 
 
-    str         _savePath           Local path where plot of 1D signal is exported to
-    str         _figureName         Name to save local plots
-    bool        _showFigure         If True, figure is displayed to console
-    bool        _saveFigure         If True, figure is saved to local drive
-    arr[float]  _axisTime           Array of Values for time axis
-    arr[float]  _axisFreq           Array of Values for frequency ax
-    bool        _logScale           If True, values are plotted on log scale
-    str         _colorMap           String indicating color map to use
+    _savePath       str                 Local path where plot of 1D signal is exported to
+    _figureName     str                 Name to save local plots
+    _showFigure     bool                If True, figures is displayed to console
+    _saveFigure     bool                If True, figures is saved to local drive
+    _axisTime       arr[float]          Array of Values for time axis
+    _axisFreq       arr[float]          Array of Values for frequency ax
+    _logScale       bool                If True, values are plotted on log scale
+    _colorMap       str                 String indicating color map to use
     --------------------------------
     
     """
@@ -914,13 +920,13 @@ class WindowFunction (AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation   
     
-    int             _nSamples           Number of samples that the window is applied to
-    int             _padTail            Number of zeros to tail pad the window with
-    int             _padHead            Number of zeros to head pad the window with
-    int             _frameSize          Size of each frame, includes samples + padding
+    _nSamples       int                 Number of samples that the window is applied to
+    _padTail        int                 Number of zeros to tail pad the window with
+    _padHead        int                 Number of zeros to head pad the window with
+    _frameSize      int                 Size of each frame, includes samples + padding
 
-    str             _function           String to indicate window function to use
-    arr[float]      _window             Array of window function and padding
+    _function       str                 String to indicate window function to use
+    _window         arr[float]          Array of window function and padding
     --------------------------------
     Return instantiated AnalysisFrames Object 
     """

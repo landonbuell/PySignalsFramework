@@ -18,10 +18,10 @@ class LinearSystem:
     EffectsSystem Type -
         Parent container for all classes in this package
     --------------------------------
-    str     _name       Name for user- Identification
-    str     _type       Type of EffectsSystem
-    bool    _isInit     T/F if layer chain is initialized for use
-    LayerChainLinear _layerChain
+    _name           str             Name for user- Identification
+    _type           str             Type of EffectsSystem
+    _isInit         bool            T/F if layer chain is initialized for use
+    _layerChain     LayerChainLinear 
     --------------------------------
     Return Instatiated EffectsSystem
     """

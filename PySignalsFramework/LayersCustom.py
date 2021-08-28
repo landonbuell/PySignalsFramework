@@ -36,7 +36,7 @@ class BasicDelay(Layers.AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    _decayEnvelope (func) : Function to model decay envelope
+    _decayEnvelope  func                Function to model decay envelope
     --------------------------------
     Abstract class - Make no instance
     """
@@ -57,9 +57,9 @@ class ClipOverdriveLayer(Layers.AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    _thresholdBase (float) : percent threshold to begin clipping
-    _thresholdCurr (float) : Actuall threshold to clip based on max/min amp   
-    _softClip (bool) : If true, signal is clipped w/ log of value
+    _thresholdBase      float           percent threshold to begin clipping
+    _thresholdCurr      float           Actuall threshold to clip based on max/min amp   
+    _softClip           bool            If true, signal is clipped w/ log of value
     --------------------------------
     Abstract class - Make no instance
     """
@@ -145,7 +145,7 @@ class SigmoidOverdriveLayer(Layers.AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    _overdriveFunction (func) : function to transform Signal
+    _overdriveFunction  func     : function to transform Signal
     --------------------------------
     Abstract class - Make no instance
     """

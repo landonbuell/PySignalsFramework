@@ -19,11 +19,11 @@ class LayerChainLinear :
     Linear Layer Chain Type - 
         Acts as double Linked list of Layers
     --------------------------------
-    str         _name       Name to Identify chain instance
-    str         _type       Str type of layer chain
-    LayerIO     _head       Head Layer in Chain [readonly]
-    LayerIO     _tail       Tail Layer in Chain [readonly]
-    int         _size       Number of Non-Sentinel nodes in the chain
+    _name       string          Name to Identify chain instance
+    _type       string          Str type of layer chain
+    _head       LayerIO         Head Layer in Chain [readonly]
+    _tail       LayerIO         Tail Layer in Chain [readonly]
+    _size       int             Number of Non-Sentinel nodes in the chain
     --------------------------------
     Return Instantiated LinearLayerChain
     """
