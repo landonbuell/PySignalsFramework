@@ -211,31 +211,26 @@ class AnalysisFramesConstructor (AbstractLayer):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    _samplesPerFrame    int             Number of samples used in each analysisFrame
-    _percentOverlap     float           Indicates percentage overlap between adjacent frames [0,1)
-    _overlapSamples     int             Number of samples overlapping
-    _maxFrames          int             Maximum number of analysis frames to use
-    _framesInUse        int             Number of frames used by 
-    _padTail            int             Number of zeros to tail-pad each analysis frame
-    _padHead            int             Number of zeros to head-pad each analysis frame
-    _frameSize          int             Size of each frame, includes samples + padding
+    _frameParams    FrameParams         Parameters for Analysis Frames Construction
     --------------------------------
     Return instantiated AnalysisFramesConstructor Object 
     """
     def __init__(self,name,inputShape=None,next=None,prev=None,
-                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,tailPad=1024,headPad=0):
+                 samplesPerFrame=1024,samplesOverlap=768,maxFrames=256,
+                 tailPad=1024,headPad=0,initParams=None):
         """ Constructor for AnalysisFamesConstructor Instance """
         super().__init__(name,"AnalysisFrameConstructor",inputShape,next,prev)
-        
-        self._samplesPerFrame = samplesPerFrame
-        self._percentOverlap = percentOverlap
-        self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
-        self._maxFrames = maxFrames
-        self._framesInUse = 0
-        self._padTail = tailPad
-        self._padHead = headPad
-        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
-        self._shapeOutput = (self._maxFrames,self._frameSize)
+        self._frameParams = None
+
+        if (initParams is not None):
+            # Use init Params as construction parameters
+            self._frameParams = initParams.deepCopy()
+        else:
+            # Use other arguments as construction parameters
+            self._frameParams = AudioTools.FrameParams(
+            samplesPerFrame,samplesOverlap,maxFrames,tailPad,headPad)
+
+
 
     def __del__(self):
         """ Destructor for AnalysisFamesConstructor Instance """
@@ -261,13 +256,20 @@ class AnalysisFramesConstructor (AbstractLayer):
         self.signalToFrames(X)
         return self._signal
 
+    @property
+    def frameParams(self):
+        """ Return Refrence to _frameParams struct instance """
+        return self._frameParams
+
     """ Protected Interface """
 
     def signalToFrames(self,X):
         """ Convert signal X into analysis Frames """
         frameStartIndex = 0
+        frameEndIndex = frameStartIndex 
         for i in range(self._maxFrames):
-            frame = X[frameStartIndex:frameStartIndex+self._samplesPerFrame]
+            frameEndIndex += self._frameParams.getSamplesPerFrame()
+            frame = X[frameStartIndex:frameEndIndex]
             if (frame.shape == (self._samplesPerFrame,)):
                 # Frame has correct shape
                 self._signal[i , self._padHead:-self._padTail] = frame
@@ -277,7 +279,7 @@ class AnalysisFramesConstructor (AbstractLayer):
                 self._signal[i , self._padHead:self._padHead + frame.shape[0]] = frame
                 self._framesInUse += 1
                 break
-            frameStartIndex += self._overlapSamples
+            frameStartIndex += self._frameParams.getSamplesOverlap()
         return self
 
     def framesToSignal(self,X):
@@ -293,30 +295,11 @@ class AnalysisFramesConstructor (AbstractLayer):
 
     def getFrameParams(self):
         """ Get Frame Construction Parameters """
-        params = [  self._samplesPerFrame,  self._percentOverlap,   self._maxFrames,
-                    self._framesInUse,      self._padTail,          self._padHead]
-        return params
+        return self._frameParams
 
     def setFrameParams(self,x):
         """ Set Frame Construction Parameters """
-        self._samplesPerFrame   = x[0]
-        self._percentOverlap    = x[1]
-        self._maxFrames         = x[2]
-        self._framesInUse       = x[3]
-        self._padTail           = x[4]
-        self._padHead           = x[5]
-        self._overlapSamples = int(x[0] * (1 - x[1] ))
-        self._initialized = False
-        return self
-
-    def getMaxFrames(self):
-        """ Get Maximum number of analysis frames """
-        return self._maxFrames
-
-    def setMaxFrames(self,x):
-        """ Set the Maximimber of analysis frames """
-        self._maxFrames = x
-        self.initialize(self._shapeInput)
+        self._frameParams = x
         return self
 
 
@@ -334,35 +317,16 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
     _isInit         bool                Indicates if Layer has been initialized    
     _signal         Signal              Signal Resulting from transformation 
 
-    _samplesPerFrame    int             Number of samples used in each analysisFrame
-    _percentOverlap     float           Indicates percentage overlap between adjacent frames [0,1)
-    _overlapSamples     int             Number of samples overlapping
-    _maxFrames          int             Maximum number of analysis frames to use
-    _framesInUse        int             Number of frames used by 
-    _padTail            int             Number of zeros to tail-pad each analysis frame
-    _padHead            int             Number of zeros to head-pad each analysis frame
-    _frameSize          int             Size of each frame, includes samples + padding
+    _frameParams    FrameParams         Parameters for Analysis Frames Construction
     --------------------------------
     Return instantiated AnalysisFramesDestructor Object 
     """
     def __init__(self,name,inputShape=None,next=None,prev=None,
-                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,tailPad=1024,headPad=0,
-                 deconstructParams=None):
+                 samplesPerFrame=1024,percentOverlap=0.75,maxFrames=256,
+                 tailPad=1024,headPad=0,destParams=None):
         """ Constructor for AnalysisFamesDestructor Instance """
         super().__init__(name,"AnalysisFrameDestructor",inputShape,next,prev,
-                         samplesPerFrame,percentOverlap,maxFrames,tailPad,headPad)
-
-        if deconstructParams:           # Parameters from AnalysisFramesConstructor
-            self.setFrameParams(deconstructParams)
-        else:
-            self._samplesPerFrame = samplesPerFrame
-            self._percentOverlap = percentOverlap
-            self._overlapSamples = int(samplesPerFrame*(1-percentOverlap))
-            self._maxFrames = maxFrames
-            self._padTail = tailPad
-            self._padHead = headPad
-            self._framesInUse = 0
-        self._frameSize = self._padHead + self._samplesPerFrame + self._padTail
+                         samplesPerFrame,percentOverlap,maxFrames,tailPad,headPad,destParams)
 
     def __del__(self):
         """ Destructor for AnalysisFamesDestructor Instance """
@@ -389,7 +353,7 @@ class AnalysisFramesDestructor (AnalysisFramesConstructor):
 
     """ Protected Interface """
 
-class Customcallable (AbstractLayer):
+class CustomCallable (AbstractLayer):
     """
     Customcallable Type - Returns User defined transformation 
     --------------------------------
@@ -463,7 +427,7 @@ class DiscreteFourierTransform(AbstractLayer):
     def call(self,X):
         """ call this Layer w/ Inputs X """
         super().call(X)
-        self.transform(X,getData())
+        self.transform(X.getData())
         self.setSignalDomain()
         return self._signal
 

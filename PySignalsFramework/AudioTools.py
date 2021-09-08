@@ -93,6 +93,7 @@ class Signal:
         self._data = None
         self._domain = None
         self._sampleRate = None
+        self._frameParams = None
 
         self.setData(data)
         self.setDomain(domain)
@@ -235,6 +236,97 @@ class Signal:
         """ Overload Subtraction Operator """
         return self._data - x
 
+class FrameParams:
+    """
+    FrameParams Type - Class to hold data related to constructing and destructing analysis Frmaes
+    --------------------------------
+    _samplesPerFrame        int         Number of waveform samples in each analysis Frames
+    _samplesOverlap         int         Number of samples overlap between each frame
+    _maxNumFrames           int         Maximum number of frames in matrix
+    _framesInUse            int         Current number if frames in matrix
+    _padTail                int         Number of zeros to tail-pad each analysis frame
+    _padHead                int         Number of zeros to head-pad each analysis frame
+    --------------------------------
+    """
+
+    def __init__(self,samplesPerFrame,samplesOverlap,maxFrames,tailPad,headPad):
+        """ Constructor for FrameParams Instance """
+        self._samplesPerFrame       = samplesPerFrame
+        self._samplesOverlap        = samplesOverlap
+        self._maxNumFrames          = maxFrames
+        self._framesInUse           = 0
+        self._padTail               = padTail
+        self._padHead               = padHead
+
+    def __del__(self):
+        """ Destructor for FrameParams Instance """
+        pass
+
+    def deepCopy(self):
+        """ Create a New FramesParams Instance as a deep copy from this one """
+        result = FrameParams(self._samplesPerFrame,self._samplesOverlap,
+                             self._maxNumFrames,self._padTail,self._padHead)
+        return result
+
+    """ Getters and Setters """
+
+    def getSamplesPerFrame(self):
+        """ Get Number of Samples per Frame """
+        return self._samplesPerFrame
+
+    def setSamplesPerFrame(self,x):
+        """ Set Number of Samples per Frame """
+        self._samplesPerFrame = x
+        return self
+
+    def getSamplesOverlap(self):
+        """ Get Number of Samples overlap """
+        return self._samplesOverlap
+
+    def setSamplesOverlap(self,x):
+        """ Set Number of Samples Overlap """
+        self._samplesOverlap = x
+        return self
+
+    def getMaxNumFrames(self):
+        """ Get Maximum Number of Analysis Frames """
+        return self._maxNumFrames
+
+    def setMaxNumFrames(self,x):
+        """ Set the Maximum Number of Analysis Frames """
+        self.__maxNumFrames = x
+        return self
+
+    @property
+    def framesInUse(self):
+        """ Return Refrence to number of frames in use """
+        return self._framesInUse
+
+    def getPadding(self):
+        """ Get Head/Tail Padding """
+        return (self._padHead,self._padTail,)
+
+    def setPadding(self,head=None,tail=None):
+        if (head is not None):
+            self._padHead = head
+        if (tail is not None):
+            self._padTail = tail
+        return self
+
+    def getPercentOverlap(self):
+        """ Get Percent Overlap Between frames """
+        return (self._samplesOverlap / self._samplesPerFrame)
+
+    def getFrameSize(self):
+        """ Get total size of Each Frame """
+        return (self._padHead + self._samplesPerFrame + self._padTail)
+
+    """ Magic Methods """
+
+    def __str__(self):
+        """ Get string representation of instance """
+        result = ""
+        return result
 
 
 class WavesGenerator :
@@ -378,8 +470,6 @@ class SimpleWavesGenerator:
         """ Create Triangle wave given amplitude, linear frequency, time axis, and phase shift """
         signal = scisig.sawtooth(2*np.pi*freq*time + phase,width=0.5)
         return signal
-
-
 
 
 class WindowFunctions :
