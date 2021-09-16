@@ -8,6 +8,7 @@ Description:
 """
 
 from __init__ import *
+import PySignalsFramework.LayersStandard as Layers
 
         #### FUNCTION DEFINTIONS ####
 
@@ -21,17 +22,216 @@ def setModule(module):
         return func
     return decorator
 
+
+        #### ERROR TYPES ####
+
+class NotListNodeException (Exception):
+    """ Exception if Next or Prev is Not a ListNode Type """
+
+    def __str__(self):
+        """ String Representation of Instance """
+
+
+
         #### CLASS DEFINTIONS ####
+
+class DoubleLinkedList:
+    """ 
+    DoubleLinkedList Type
+        Simple Implementation of a double Linked List for collection of layers
+    --------------------------------
+    _head       LayerIO         Head Layer in Chain [readonly]
+    _tail       LayerIO         Tail Layer in Chain [readonly]
+    _size       int             Number of Non-Sentinel nodes in the chain
+    --------------------------------
+    
+    """
+
+    def __init__(self,dType=Layers.AbstractLayer,items=None):
+        """ Constructor for DoubleLinkedList Instance """
+        self._dType     = dType
+        self._head      = ListNode(data="HEADNODE")
+        self._tail      = ListNode(data="TAILNODE") 
+        self._size      = 0
+
+        if (items is not None):  # Given Items
+            pass
+        else:                   # Empty List
+            DoubleLinkedList.coupleNodes(
+                self._head,self._tail)
+        
+    def __del__(self):
+        """ Destructor for DoubleLinkedList Instance """
+        pass
+
+    """ Private Interface """
+
+    class ListNode:
+        """ Represents Node in Double Linked List """
+
+        def __init__(self,data,prev=None,next=None,):
+            """ Constructor for ListNode Instance """
+            self._data = data
+            self._prev = prev
+            self._next = next
+
+        def __del__(self):
+            """ Destructor for ListNode Instance """
+            pass
+
+        """ Public Interface """
+
+        def getData(self):
+            """ Get the Data stored at this ListNode """
+            return self._data
+
+        def setData(self,x):
+            """ Set the Data stored at this ListNode """       
+            self._data = x
+            return self
+
+        def getPrev(self):
+            """ Get the Previous  Node """
+            return self._prev
+
+        def setPrev(self,x):
+            """ Set the Previous Node """
+            if (type(x) == ListNode):
+                self._prev = x
+            else:
+                raise TypeError("Must be of type 'ListNode'")
+            return self
+
+        def getNext(self):
+            """ Get the Next Node """
+            return self._next
+
+        def setNext(self,x):
+            """ Set the Previous Node """
+            if (type(x) == ListNode):
+                self._next = x
+            else:
+                raise TypeError("Must be of type 'ListNode'")
+            return self
+
+        def coupleToNext(self,other):
+            """ Couple other ListNode as Next """
+            if (type(other) == ListNode)
+                self._next = other
+                other.setPrev(self)
+            else:
+                raise TypeError("Next must be of type ListNode")
+            return self
+            
+        def coupleToNext(self,other):
+            """ Couple other ListNode as Next """
+            if (type(other) == ListNode)
+                self._prev = other
+                other.setNext(self)
+            else:
+                raise TypeError("Next must be of type ListNode")
+            return self 
+
+    @staticmethod
+    def coupleNodes(left,right):
+        """ Couple Nodes s.t. 
+            left->next = right &
+            right->prev = left """
+        left.setNext(right)
+        right.setPrev(left)
+        return True
+
+    @staticMethod
+    def joinThree(left,middle,right)
+        """ Join Three Nodes such that
+        left->middle->right &
+        left<-middle<-right """
+        left.setNext(middle)
+        middle.setNext(right)
+        right.setPrev(middle)
+        middle.setPrev(left)
+        return True
+
+    """ Getters and Setters """
+
+    def getHead(self):
+        """ Get the HeadNode of this DoubleLinkedList """
+        return self._head
+
+    def getTail(self):
+        """ GEt the TailNode of this DoubleLinkedList """
+        return self._tail
+
+    """ Public Interface """
+
+    def append(self,data):
+        """ Add a ListNode w/ data to the end of the linked List """
+        newNode = DoubleLinkedList.ListNode(data)
+        if (self._size == 0):       # Empty list
+            DoubleLinkedList.coupleNodes(self._head,newNode)
+            DoubleLinkedList.coupleNodes(newNode,self._prev)
+        else:                       # Not empty List
+            oldTailPrev = self._tail.getPrev()
+            DoubleLinkedList.coupleNodes(oldTailPrev,newNode)
+            DoubleLinkedList.coupleNodes(newNode,self._tail)
+        self._size += 1
+        return self
+
+    def prepend(self,data):
+        """ Add a ListNode w/ data to the start of the linked list """
+        newNode = DoubleLinkedList.ListNode(data)
+        if (self._size == 0):       # Empty list
+            DoubleLinkedList.coupleNodes(self._head,newNode)
+            DoubleLinkedList.coupleNodes(newNode,self._prev)
+        else:
+            oldHeadNext = self._head.getNext()
+            DoubleLinkedList.coupleNodes(self._head,newNode)
+            DoubleLinkedList.coupleNodes(newNode,oldHeadNext)
+        self._size += 1
+        return self
+
+    def popHead(self):
+        """ Remove and return data from head->next """
+        pass
+
+    def popTail(self):
+        """ Remove and Return data ferom tail->prev """
+        pass
+
+    def insertAtIndex(self,data,index):
+        """ Insert Node w/ data at index """
+        if (index >= self._size):
+            raise IndexError("Index out of bounds")
+        newNode = ListNode(data)
+
+    def removeAtIndex(self,index):
+        """ Remove Node at index, return data """
+        if (index >= self._size):
+            raise IndexError("Index out of bounds")
+
+    """ Magic Methods """
+
+    def __str__(self):
+        """ String of DoubleLinkedList Instance """
+        return "DoubleLinkedList w/ " + str(self._size) + " nodes"
+
+    def __repr__(self):
+        """ Programmer Representation of DoubleLinkedList Instance """
+        return "DoubleLinkedList w/ " + str(self._size) + " nodes"
+
+    def __len__(self):
+        """ Get the Number of Non-sentinel Nodes in this Linked List """
+        return self._size
 
 class SimpleStack:
     """ Simple Stack Implementation """
 
     def __init__(self,cap,dType):
         """ Constructor for SimpleStack Instance """
-        self._top = -1
+        self._top   = -1
         self._dType = dType
-        self._cap = cap
-        self._arr = np.empty(shape=(self._cap),dtype=self._dType)
+        self._cap   = cap
+        self._arr   = np.empty(shape=(self._cap),dtype=self._dType)
 
     def __del__(self):
         """ Destructor for SimpleStack Instance """

@@ -10,6 +10,7 @@ Description:
         #### IMPORTS ####
 
 import PySignalsFramework.LayerChain as LayerChain
+import PySignalsFramework.AdminTools as AdminTools
 
         #### CLASS DEFINITIONS ####
 
@@ -17,11 +18,12 @@ class LinearSystem:
     """ 
     EffectsSystem Type -
         Parent container for all classes in this package
+        Contains One input and One Output Node
     --------------------------------
-    _name           str             Name for user- Identification
-    _type           str             Type of EffectsSystem
-    _isInit         bool            T/F if layer chain is initialized for use
-    _layerChain     LayerChainLinear 
+    _name           str                 Name for user- Identification
+    _type           str                 Type of EffectsSystem
+    _isInit         bool                T/F if layer chain is initialized for use
+    _layerChain     DoubleLinkedList    Double Linked List Layer Chain
     --------------------------------
     Return Instatiated EffectsSystem
     """

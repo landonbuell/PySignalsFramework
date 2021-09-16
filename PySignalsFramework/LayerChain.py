@@ -99,18 +99,6 @@ class LayerChainLinear :
         self._size += 1
         return self
 
-    def popFromTail(self):
-        """ Remove + Return the last layer before the tail """
-        if len(self.getChainList) == 0:
-            raise IndexError("No elements currently in layer chain")
-        else:
-            oldOutput = self.getOutput
-            newOutput = oldOutput.Prev
-            self.getTail.SetPrev(newOutput)
-            newOutput.SetNext(self.getTail)
-            self._size -= 1
-        return oldOutput
-
     def popFromHead(self):
         """ Remove + Return the first layer after the head """
         if len(self.getChainList) == 0:
@@ -122,6 +110,18 @@ class LayerChainLinear :
             newInput.SetPrev(self.getHead)
             self._size -= 1
         return oldInput
+
+    def popFromTail(self):
+        """ Remove + Return the last layer before the tail """
+        if len(self.getChainList) == 0:
+            raise IndexError("No elements currently in layer chain")
+        else:
+            oldOutput = self.getOutput
+            newOutput = oldOutput.Prev
+            self.getTail.SetPrev(newOutput)
+            newOutput.SetNext(self.getTail)
+            self._size -= 1
+        return oldOutput
 
     def initialize(self,inputShape):
         """ Initialize layer Chain For Usage """
