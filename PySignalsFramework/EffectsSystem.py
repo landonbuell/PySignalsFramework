@@ -9,7 +9,6 @@ Description:
 
         #### IMPORTS ####
 
-import PySignalsFramework.LayerChain as LayerChain
 import PySignalsFramework.AdminTools as AdminTools
 
         #### CLASS DEFINITIONS ####
@@ -30,27 +29,34 @@ class LinearSystem:
     
     def __init__(self,name,layers=None,input=None,output=None):
         """ Constructor for EffectsEummulatorSystem """
-        self._name = name
-        self._type = "EffectsSystem"
-
-        self._layerChain = LayerChain.LayerChainLinear(name+"Chain",layers)
-        self._nLayers = len(self._layerChain)
-
-        self._isInit = False
+        self._name          = name
+        self._type          = "EffectsSystem"
+        self._layerChain    = AdminTools.DoubleLinkedList()
+        self._isInit        = False
 
     """ Public Interface """
 
-    def add(self,newLayer):
-        """ Add a new Layer to this Layer Chain """
-        self._layerChain.Append(newLayer)
-        self._nLayers += 1
+    def addTail(self,newLayer):
+        """ Add a new Layer to the end of the Layer Chain """
+        self._layerChain.append(newLayer)
         self._isInit = False
         return self
 
-    def pop(self):
+    def addHead(self,newLayer):
+        """ Add a new Layer to the front of the Layer Chain """
+        self._layerChain.prepend(newLayer)
+        self._isInit = False
+        return self
+
+    def popTail(self):
         """ Remove a layer from the end of the layer chain """
-        removedLayer =  self._layerChain.PopFromTail()
-        self._nLayers -= 1;
+        removedLayer =  self._layerChain.popTail()
+        self._isInit = False
+        return removedLayer
+
+    def popHead(self):
+        """ Remove a layer from the end of the layer chain """
+        removedLayer =  self._layerChain.popHead()
         self._isInit = False
         return removedLayer
 

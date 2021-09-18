@@ -25,14 +25,6 @@ def setModule(module):
 
         #### ERROR TYPES ####
 
-class NotListNodeException (Exception):
-    """ Exception if Next or Prev is Not a ListNode Type """
-
-    def __str__(self):
-        """ String Representation of Instance """
-
-
-
         #### CLASS DEFINTIONS ####
 
 class DoubleLinkedList:
@@ -56,7 +48,8 @@ class DoubleLinkedList:
 
         if (items is not None):  # Given Items
             pass
-        else:                   # Empty List
+
+        else:                   # Empty List couple head<->tail
             DoubleLinkedList.coupleNodes(
                 self._head,self._tail)
         
@@ -116,7 +109,7 @@ class DoubleLinkedList:
 
         def coupleToNext(self,other):
             """ Couple other ListNode as Next """
-            if (type(other) == ListNode)
+            if (type(other) == ListNode):
                 self._next = other
                 other.setPrev(self)
             else:
@@ -125,12 +118,14 @@ class DoubleLinkedList:
             
         def coupleToNext(self,other):
             """ Couple other ListNode as Next """
-            if (type(other) == ListNode)
+            if (type(other) == ListNode):
                 self._prev = other
                 other.setNext(self)
             else:
                 raise TypeError("Next must be of type ListNode")
             return self 
+
+    # End ListNode Defintion
 
     @staticmethod
     def coupleNodes(left,right):
@@ -142,7 +137,7 @@ class DoubleLinkedList:
         return True
 
     @staticMethod
-    def joinThree(left,middle,right)
+    def joinThree(left,middle,right):
         """ Join Three Nodes such that
         left->middle->right &
         left<-middle<-right """
@@ -190,26 +185,35 @@ class DoubleLinkedList:
         self._size += 1
         return self
 
-    def popHead(self):
-        """ Remove and return data from head->next """
-        pass
-
-    def popTail(self):
+     def popTail(self):
         """ Remove and Return data ferom tail->prev """
         pass
+
+    def popHead(self):
+        """ Remove and return data from head->next """
+        toRemove = self._head.getNext()
+        DoubleLinkedList.coupleNodes(self._head,toRemove.getNext())
+        return toRemove
+
 
     def insertAtIndex(self,data,index):
         """ Insert Node w/ data at index """
         if (index >= self._size):
             raise IndexError("Index out of bounds")
         newNode = ListNode(data)
+        raise NotImplementedError()
 
     def removeAtIndex(self,index):
         """ Remove Node at index, return data """
         if (index >= self._size):
             raise IndexError("Index out of bounds")
+        raise NotImplementedError()
 
     """ Magic Methods """
+
+    def __iter__(self):
+        """ Forward Iterator for DoubleLinkedList """
+
 
     def __str__(self):
         """ String of DoubleLinkedList Instance """
@@ -222,6 +226,17 @@ class DoubleLinkedList:
     def __len__(self):
         """ Get the Number of Non-sentinel Nodes in this Linked List """
         return self._size
+
+class DirectedGraph:
+    """
+    DirectedGraph Type
+        Represents the parent structure of a directed and unweighted graph
+    --------------------------------
+
+    --------------------------------
+    """
+
+    pass
 
 class SimpleStack:
     """ Simple Stack Implementation """
