@@ -55,26 +55,32 @@ class LinearSystem:
         return removedLayer
 
     def popHead(self):
-        """ Remove a layer from the end of the layer chain """
+        """ Remove a layer from the front of the layer chain """
         removedLayer =  self._layerChain.popHead()
         self._isInit = False
         return removedLayer
 
-    def InitializeChain(self,inputShape):
+    def initializeChain(self,inputShape):
         """ Initialize All modules in the Layer Chain """
-        self._layerChain.Initialize(inputShape)
-        self._isInit = True
-        return self
+        successful = False
+        for layer in self._layerChain:  # iterate through each layer
+            layer.initialze()
+        successful = True
+        return successful
 
-    def Call(self,X):
+    def call(self,X):
         """ Call Each layer in chain with Inputs X """
         if (self._isInit != True):
             raise Exception("Chain Not Initialized!")
         if (X.shape != self.getInputShape):     # shapes are not equal
-            self.InitializeChain(X.shape)       # Re-init Chain w/ shape
+            self.initializeChain(X.shape)       # Re-init Chain w/ shape
 
         # Call the Layer Chain
-        X = self._layerChain.Call(X)
+        for layer in self._layerChain:
+            layer.call(X)           # call w/ inputs X
+            X = layer.getSignal()   # get resulting signal
+
+        # The Final Signal
         return X
        
     """ Getter & Setter Methods """
@@ -86,14 +92,6 @@ class LinearSystem:
     def getType(self):
         """ Get Type of this Effects System """
         return self._type
-
-    def getLayerChainInst(self):
-        """ Get the LayerChain as the Instance """
-        return self._layerChain
-
-    def getLayerChainList(self):
-        """ Get the LayerChain as a List """
-        return self._layerChain.getChainlist()
 
     def getInput(self):
         """ Get input Layer of Chain """
@@ -110,11 +108,6 @@ class LinearSystem:
     def getOutputShape(self):
         """ Return the inputShape of this System """
         return self._layerChain.getOutput().getOutputShape()
-
-    def setSampleRate(self,x):
-        """ Set All Layers to new Sample Rate """
-        self._layerChain.setSampleRate(x)
-        return self
 
     """ Magic Methods """
 

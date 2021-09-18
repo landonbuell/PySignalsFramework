@@ -185,7 +185,7 @@ class DoubleLinkedList:
         self._size += 1
         return self
 
-     def popTail(self):
+    def popTail(self):
         """ Remove and Return data ferom tail->prev """
         pass
 
@@ -198,14 +198,14 @@ class DoubleLinkedList:
 
     def insertAtIndex(self,data,index):
         """ Insert Node w/ data at index """
-        if (index >= self._size):
+        if (index >= self._size or index < 0):
             raise IndexError("Index out of bounds")
         newNode = ListNode(data)
         raise NotImplementedError()
 
     def removeAtIndex(self,index):
         """ Remove Node at index, return data """
-        if (index >= self._size):
+        if (index >= self._size or index < 0):
             raise IndexError("Index out of bounds")
         raise NotImplementedError()
 
@@ -213,7 +213,20 @@ class DoubleLinkedList:
 
     def __iter__(self):
         """ Forward Iterator for DoubleLinkedList """
+        currentNode = self._head
+        while (currentNode != self.tail):
+            yield currentNode.getData()
+            currentNode = currentNode.getNext()
+        return self._tail.getData()
 
+    def __getitem__(self,index):
+        """ Index Operator """
+        if (index >= self._size or index < 0):
+            raise IndexError("Index out of bounds")
+        currentNode = self._head
+        for i in range(index):
+            currentNode = currentNode.getNext()
+        return currentNode.getData()
 
     def __str__(self):
         """ String of DoubleLinkedList Instance """
