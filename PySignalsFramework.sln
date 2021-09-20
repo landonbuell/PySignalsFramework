@@ -16,6 +16,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AudioSamples", "AudioSamples", "{6FD70657-9952-46A4-93BE-BCB02B9C3391}"
+	ProjectSection(SolutionItems) = preProject
+		AudioSamples\KnockingOnHeavensDoor.wav = AudioSamples\KnockingOnHeavensDoor.wav
+		AudioSamples\KnockingOnHeavensDoorOutput.wav = AudioSamples\KnockingOnHeavensDoorOutput.wav
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

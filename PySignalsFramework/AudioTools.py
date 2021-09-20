@@ -51,13 +51,13 @@ class AudioIO :
     def writeWAV(localPath,signal,sampleRate):
         """ Write wav Audio file to local path """
         try:
-            signal = signal.astype('int32')
+            #signal = signal.astype(np.float32)
             scipy.io.wavfile.write(localPath,sampleRate,signal)
             return True
         except Exception as expt:
             print(expt)
             return False
-
+        
     @staticmethod
     def writeTXT(localPath,signal):
         """ Write txt Audio file to local path """
@@ -201,11 +201,30 @@ class Signal:
             print(ecxpt)
         return False
 
+    def readFromWav(filePath):
+        """ Read Audio file and return as Signal Instance """
+        sampleRate,signal = AudioIO.readWAV(filePath)
+        self.setSampleRate(sampleRate)
+        self.setData(signal)
+        return result
+
+    def writeToWav(filePath):
+        """ Write current Signal to time-series audio file"""
+        if (self._domian != "TIME"):
+            print("WARNING - Attempting to export non-time-series signal!")
+        try:
+            AudioIO.writeWav(filePath,self._data,self._sampleRate)
+            return True
+        except Exception as excpt:
+            print(excpt)
+            return False
+    
+
     """ Private Interface """
 
     
 
-    """ Magic Methods """
+    """ Magic Methods  and Static Methods """
 
     def __str__(self):
         """ Return String Representation of Instance """
@@ -235,6 +254,9 @@ class Signal:
     def __sub__(self,x):
         """ Overload Subtraction Operator """
         return self._data - x
+
+   
+
 
 class FrameParams:
     """
@@ -500,8 +522,6 @@ class WindowFunctions :
     def gaussianWindow(nSamples):
         """ Get Hanning Window that is nSamples Long """
         return scisig.windows.gaussian(nSamples)
-
-
 
 
 class Plotting:
