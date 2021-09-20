@@ -1,8 +1,10 @@
 """
-PySignalsTutorials
-Tutorial 00 - 
-Landon Buell
-15 June 2021
+Author:         Landon Buell
+Date:           August 2021
+Solution:       PySignalFramework
+Project:        PySignalsTutorialz
+File:           Tutorial01.py
+Description:
 """
 
         #### IMPORTS ####
